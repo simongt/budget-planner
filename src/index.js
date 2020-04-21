@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Auth, Home, Landing, Report, Slider } from './js/components';
+import App from './App';
 
 const wrapper = document.getElementById('root');
 
-wrapper ? ReactDOM.render(<Landing />, wrapper) : false;
+console.log('src/index.js <-- app entry point', wrapper);
+
+wrapper ? ReactDOM.render(<App />, wrapper) : false;

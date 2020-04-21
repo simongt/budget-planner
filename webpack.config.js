@@ -1,29 +1,45 @@
-const HtmlWebPackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-module.exports = {
+const config = {
+  entry: ['react-hot-loader/patch', './src/index.js'],
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    filename: 'bundle.js'
+  },
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader'
-        }
+        use: 'babel-loader',
+        exclude: /node_modules/
       },
       {
-        test: /\.html$/,
-        use: [
-          {
-            loader: 'html-loader'
-          }
-        ]
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader']
       }
     ]
   },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+    alias: {
+      'react-dom': '@hot-loader/react-dom'
+    }
+  },
+  devServer: {
+    contentBase: './dist'
+  },
   plugins: [
-    new HtmlWebPackPlugin({
-      template: './src/index.html',
-      filename: './index.html'
-    })
+    new HtmlWebpackPlugin({
+      title: 'Budget Planner',
+      appMountId: 'app',
+      filename: 'index.html',
+      template: 'src/index.html'
+    }),
+    new MiniCssExtractPlugin()
   ]
 };
+
+module.exports = config;
