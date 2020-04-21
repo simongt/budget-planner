@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Login, Home, Landing, Report, Slider } from './components';
+import { Login, Signup, Home, Landing, Report, Slider } from './components';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
 import { hot } from 'react-hot-loader/root';
 // import { connect } from 'react-redux';
@@ -38,7 +38,7 @@ class App extends Component {
     ) : (
       <Router>
         <Switch>
-          <Route exact path='/' component={Home}></Route>
+          <Route exact path='/' component={Login}></Route>
           <PrivateRoute
             path='/home'
             authenticated={this.state.authenticated}
@@ -54,6 +54,11 @@ class App extends Component {
             authenticated={this.state.authenticated}
             component={Login}
           ></PublicRoute>
+          <PublicRoute
+            path='/signup'
+            authenticated={this.state.authenticated}
+            component={Signup}
+          ></PublicRoute>
         </Switch>
       </Router>
     );
@@ -64,6 +69,6 @@ class App extends Component {
 
 // const mapDispatchToProps = {};
 
-// export default connect(mapStateToProps, mapDispatchToProps)(App);
+// export default hot(connect(mapStateToProps, mapDispatchToProps)(App));
 
 export default hot(App);
