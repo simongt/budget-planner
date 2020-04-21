@@ -20,7 +20,3 @@ class Landing extends Component {
 // export default connect(mapStateToProps, mapDispatchToProps)(Landing);
 
 export default Landing;
-
-const wrapper = document.getElementById('container');
-
-wrapper ? ReactDOM.render(<Landing />, wrapper) : false;
