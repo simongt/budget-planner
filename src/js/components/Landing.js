@@ -22,4 +22,5 @@ class Landing extends Component {
 export default Landing;
 
 const wrapper = document.getElementById('container');
-wrapper ? ReactDOM.render(<Form />, wrapper) : false;
+
+wrapper ? ReactDOM.render(<Landing />, wrapper) : false;
