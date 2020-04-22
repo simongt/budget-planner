@@ -16,7 +16,7 @@ class App extends Component {
 
   componentDidMount() {
     console.log('src/App.js --> componentDidMount');
-    auth().onAuthStateChanged((user) => {
+    auth().onAuthStateChanged(user => {
       if (user) {
         this.setState({
           authenticated: true,

@@ -5,7 +5,7 @@ function PrivateRoute({ component: Component, authenticated, ...rest }) {
   return (
     <Route
       {...rest}
-      render={(props) =>
+      render={props =>
         authenticated === true ? (
           <Component {...props} />
         ) : (
@@ -20,7 +20,7 @@ function PublicRoute({ component: Component, authenticated, ...rest }) {
   return (
     <Route
       {...rest}
-      render={(props) =>
+      render={props =>
         authenticated === false ? <Component {...props} /> : <Redirect to='/home' />
       }
     />

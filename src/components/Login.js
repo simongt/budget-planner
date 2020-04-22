@@ -39,12 +39,12 @@ class Login extends Component {
     this.setState({ error: '', submitPressed: true }, () => {
       auth()
         .signInWithEmailAndPassword(this.state.email, this.state.password)
-        .then((result) => {
+        .then(result => {
           console.log(result);
           toast('Email sign-in successful.');
           this.setState({ user: auth().currentUser, submitPressed: false });
         })
-        .catch((error) => {
+        .catch(error => {
           const errorCode = error.code;
           const errorMessage = error.message;
           toast(error.message);
@@ -68,7 +68,7 @@ class Login extends Component {
           //   }
           // });
         })
-        .catch((error) => {
+        .catch(error => {
           const errorCode = error.code;
           const errorMessage = error.message;
           toast(error.message);
@@ -77,10 +77,10 @@ class Login extends Component {
     });
   };
 
-  handleChange = (event) => {
+  handleChange = event => {
     event.persist();
     // dynamically determine the key and set the corresponding state variable
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       // ...prevState,
       // if user changes any single attribute, it will mutate that corresponding attribute in state
       [event.target.name]: event.target.value
@@ -100,7 +100,7 @@ class Login extends Component {
       auth()
         .signInWithPopup(provider)
         .then(
-          (result) => {
+          result => {
             const epoch = new Date().toISOString();
             console.log('Login --> handleGoogleSignin --> epoch:', epoch);
             const user = result.user; // The firebase.User instance
@@ -117,12 +117,12 @@ class Login extends Component {
               toast('Google sign-in successful.');
             });
           },
-          (error) => {
+          error => {
             // If account-exists-with-different-credential, fetch the providers linked to that email
             const email = error.email; // provider's account email
             const credential = error.credential; // provider's credential
             if (error.code === 'auth/account-exists-with-different-credential') {
-              auth.fetchSignInMethodsForEmail(email).then((providers) => {
+              auth.fetchSignInMethodsForEmail(email).then(providers => {
                 console.log('Login --> handleGoogleSignin --> providers: ', providers);
               });
             }
