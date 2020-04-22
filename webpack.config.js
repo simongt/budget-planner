@@ -9,6 +9,8 @@ const config = {
     path: path.resolve(__dirname, './dist'),
     filename: 'bundle.js'
   },
+  context: __dirname,
+  target: 'web',
   module: {
     rules: [
       {
@@ -25,13 +27,51 @@ const config = {
         loader: 'style-loader!css-loader!sass-loader'
       },
       {
-        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
         use: [
           {
             loader: 'file-loader',
             options: {
               name: '[name].[ext]',
-              outputPath: 'fonts/'
+              outputPath: 'assets/fonts/'
+            }
+          }
+        ]
+      },
+      // {
+      //   test: /\.(jpg|png|gif)$/,
+      //   use: [
+      //     {
+      //       loader: 'url-loader',
+      //       options: {
+      //         limit: 2048,
+      //         name: '[name].[ext]',
+      //         outputPath: 'assets/images/'
+      //       }
+      //     }
+      //   ]
+      // },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/images/',
+              esModule: false
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(svg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/svg/'
             }
           }
         ]
@@ -52,10 +92,15 @@ const config = {
       title: 'Budget Planner',
       appMountId: 'app',
       filename: 'index.html',
-      template: 'src/public/index.html'
+      template: 'src/static/index.html'
     }),
     new MiniCssExtractPlugin()
-  ]
+  ],
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  }
 };
 
 module.exports = config;
