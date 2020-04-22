@@ -1,10 +1,11 @@
+import withRoot from './lib/withRoot';
 import React, { Component } from 'react';
-import { Login, Signup, Home, Landing, Report, Slider } from './components';
+import { Login, Signup, Home, Landing, Report, Slider } from './views';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
 // import { hot } from 'react-hot-loader/root';
 // import { connect } from 'react-redux';
 import { auth } from './services/firebase';
-import { PrivateRoute, PublicRoute } from './components/Routes';
+import { PrivateRoute, PublicRoute, Routes } from './views/Routes';
 
 class App extends Component {
   constructor(props) {
@@ -33,56 +34,7 @@ class App extends Component {
 
   render() {
     console.log('src/App.js --> render');
-    return this.state.loading ? (
-      'Loading...'
-    ) : (
-      <Router>
-        <Switch>
-          <Route
-            exact
-            path='/'
-            component={() => {
-              return <Login authenticated={this.state.authenticated} />;
-            }}
-          ></Route>
-          <PrivateRoute
-            path='/home'
-            authenticated={this.state.authenticated}
-            component={() => {
-              return <Home authenticated={this.state.authenticated} />;
-            }}
-          ></PrivateRoute>
-          <PrivateRoute
-            path='/login'
-            authenticated={this.state.authenticated}
-            component={() => {
-              return <Login authenticated={this.state.authenticated} />;
-            }}
-          ></PrivateRoute>
-          <PublicRoute
-            path='/landing'
-            authenticated={this.state.authenticated}
-            component={() => {
-              return <Landing authenticated={this.state.authenticated} />;
-            }}
-          ></PublicRoute>
-          <PublicRoute
-            path='/login'
-            authenticated={this.state.authenticated}
-            component={() => {
-              return <Login authenticated={this.state.authenticated} />;
-            }}
-          ></PublicRoute>
-          <PublicRoute
-            path='/signup'
-            authenticated={this.state.authenticated}
-            component={() => {
-              return <Signup authenticated={this.state.authenticated} />;
-            }}
-          ></PublicRoute>
-        </Switch>
-      </Router>
-    );
+    return this.state.loading ? 'Loading...' : <Routes authenticated={this.state.authenticated} />;
   }
 }
 
@@ -92,5 +44,8 @@ class App extends Component {
 
 // export default hot(connect(mapStateToProps, mapDispatchToProps)(App));
 
+// export default App;
+
 // export default hot(App);
-export default App;
+
+export default withRoot(App);
