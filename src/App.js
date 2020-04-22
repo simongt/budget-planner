@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Login, Signup, Home, Landing, Report, Slider } from './components';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
-import { hot } from 'react-hot-loader/root';
+// import { hot } from 'react-hot-loader/root';
 // import { connect } from 'react-redux';
 import { auth } from './services/firebase';
 import { PrivateRoute, PublicRoute } from './components/Routes';
@@ -38,26 +38,47 @@ class App extends Component {
     ) : (
       <Router>
         <Switch>
-          <Route exact path='/' component={Login}></Route>
+          <Route
+            exact
+            path='/'
+            component={() => {
+              return <Login authenticated={this.state.authenticated} />;
+            }}
+          ></Route>
           <PrivateRoute
             path='/home'
             authenticated={this.state.authenticated}
-            component={Home}
+            component={() => {
+              return <Home authenticated={this.state.authenticated} />;
+            }}
+          ></PrivateRoute>
+          <PrivateRoute
+            path='/login'
+            authenticated={this.state.authenticated}
+            component={() => {
+              return <Login authenticated={this.state.authenticated} />;
+            }}
           ></PrivateRoute>
           <PublicRoute
             path='/landing'
             authenticated={this.state.authenticated}
-            component={Landing}
+            component={() => {
+              return <Landing authenticated={this.state.authenticated} />;
+            }}
           ></PublicRoute>
           <PublicRoute
             path='/login'
             authenticated={this.state.authenticated}
-            component={Login}
+            component={() => {
+              return <Login authenticated={this.state.authenticated} />;
+            }}
           ></PublicRoute>
           <PublicRoute
             path='/signup'
             authenticated={this.state.authenticated}
-            component={Signup}
+            component={() => {
+              return <Signup authenticated={this.state.authenticated} />;
+            }}
           ></PublicRoute>
         </Switch>
       </Router>
@@ -71,4 +92,5 @@ class App extends Component {
 
 // export default hot(connect(mapStateToProps, mapDispatchToProps)(App));
 
-export default hot(App);
+// export default hot(App);
+export default App;

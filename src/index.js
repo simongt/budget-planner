@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+toast.configure();
+document.cookie = 'SameSite=None; Secure';
 const wrapper = document.getElementById('root');
-
 console.log('src/index.js <-- app entry point', wrapper);
-
 wrapper ? ReactDOM.render(<App />, wrapper) : false;

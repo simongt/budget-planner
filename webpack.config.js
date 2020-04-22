@@ -36,7 +36,7 @@ const config = {
       title: 'Budget Planner',
       appMountId: 'app',
       filename: 'index.html',
-      template: 'src/index.html'
+      template: 'src/public/index.html'
     }),
     new MiniCssExtractPlugin()
   ]
