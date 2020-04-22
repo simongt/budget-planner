@@ -1,16 +1,23 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 // import { connect } from 'react-redux';
-import { signup, signin, signInWithGoogle } from '../services/firebase';
+import { signup, signin, signinWithGoogle } from '../services/firebase';
 
 class Login extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { error: null, email: '', password: '' };
+    this.state = { loading: true, authenticated: false, error: null, email: '', password: '' };
   }
 
+  componentDidMount = () => {
+    this.setState({ authenticated: this.props.authenticated }, () => {
+      this.setState({ loading: false });
+    });
+  };
+
   handleSubmit = async () => {
+    console.log('Login --> handleSubmit');
     event.preventDefault();
     this.setState({ error: '' });
     try {
@@ -24,20 +31,27 @@ class Login extends Component {
   handleChange = (event) => {
     // dynamically determine the key and set the corresponding state variable
     this.setState({
+      ...state,
+      // if user changes any single attribute, it will mutate that corresponding attribute in state
       [event.target.name]: event.target.value
     });
   };
 
   handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      await signinWithGoogle();
     } catch (error) {
       this.setState({ error: error.message });
     }
   };
 
   render() {
-    return (
+    const { loading, authenticated, error, email, password } = this.state;
+    return loading ? (
+      'Loading...'
+    ) : authenticated ? (
+      'Welcome!'
+    ) : (
       <div>
         <form autoComplete='off' onSubmit={this.handleSubmit}>
           <h1>
