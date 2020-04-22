@@ -44,9 +44,14 @@
   "dependencies": {
     "@material-ui/core": "^4.9.11",
     "@material-ui/icons": "^4.9.1",
+    "clsx": "^1.1.0",
+    "final-form": "^4.19.1",
     "firebase": "^7.14.1",
+    "markdown-to-jsx": "^6.11.1",
+    "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-final-form": "^6.4.0",
     "react-hot-loader": "^4.12.20",
     "react-redux": "^7.2.0",
     "react-redux-firebase": "^3.3.0",
@@ -54,6 +59,7 @@
     "react-toastify": "^5.5.0",
     "redux": "^4.0.5",
     "redux-firestore": "^0.13.0",
-    "typeface-roboto": "0.0.75"
+    "typeface-roboto": "0.0.75",
+    "validator": "^13.0.0"
   }
 }
