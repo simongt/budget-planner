@@ -1,10 +1,12 @@
+import withRoot from './lib/withRoot';
 import React, { Component } from 'react';
-import { Login, Signup, Home, Landing, Report, Slider } from './components';
+import { Login, Signup, Home, Landing, Report, Slider } from './views';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
-import { hot } from 'react-hot-loader/root';
+// import { hot } from 'react-hot-loader/root';
 // import { connect } from 'react-redux';
 import { auth } from './services/firebase';
-import { PrivateRoute, PublicRoute } from './components/Routes';
+import { PrivateRoute, PublicRoute, Routes } from './views/Routes';
+import { CircularProgress, LinearProgress } from '@material-ui/core';
 
 class App extends Component {
   constructor(props) {
@@ -16,7 +18,7 @@ class App extends Component {
 
   componentDidMount() {
     console.log('src/App.js --> componentDidMount');
-    auth().onAuthStateChanged((user) => {
+    auth().onAuthStateChanged(user => {
       if (user) {
         this.setState({
           authenticated: true,
@@ -34,33 +36,9 @@ class App extends Component {
   render() {
     console.log('src/App.js --> render');
     return this.state.loading ? (
-      'Loading...'
+      <LinearProgress color='secondary' />
     ) : (
-      <Router>
-        <Switch>
-          <Route exact path='/' component={Login}></Route>
-          <PrivateRoute
-            path='/home'
-            authenticated={this.state.authenticated}
-            component={Home}
-          ></PrivateRoute>
-          <PublicRoute
-            path='/landing'
-            authenticated={this.state.authenticated}
-            component={Landing}
-          ></PublicRoute>
-          <PublicRoute
-            path='/login'
-            authenticated={this.state.authenticated}
-            component={Login}
-          ></PublicRoute>
-          <PublicRoute
-            path='/signup'
-            authenticated={this.state.authenticated}
-            component={Signup}
-          ></PublicRoute>
-        </Switch>
-      </Router>
+      <Routes authenticated={this.state.authenticated} />
     );
   }
 }
@@ -71,4 +49,8 @@ class App extends Component {
 
 // export default hot(connect(mapStateToProps, mapDispatchToProps)(App));
 
-export default hot(App);
+// export default App;
+
+// export default hot(App);
+
+export default withRoot(App);

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 // import { connect } from 'react-redux';
-import { signup, signin, signInWithGoogle } from '../services/firebase';
+import { signup, signin } from '../services/firebase';
 
-class Login extends Component {
+class Signup extends Component {
   constructor(props) {
     super(props);
 
@@ -15,25 +15,17 @@ class Login extends Component {
     this.setState({ error: '' });
     try {
       // pass the email and password entered by the user
-      await signin(this.state.email, this.state.password);
+      await signup(this.state.email, this.state.password);
     } catch (error) {
       this.setState({ error: error.message });
     }
   };
 
-  handleChange = (event) => {
+  handleChange = event => {
     // dynamically determine the key and set the corresponding state variable
     this.setState({
       [event.target.name]: event.target.value
     });
-  };
-
-  handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      this.setState({ error: error.message });
-    }
   };
 
   render() {
@@ -41,10 +33,10 @@ class Login extends Component {
       <div>
         <form autoComplete='off' onSubmit={this.handleSubmit}>
           <h1>
-            {'Login to '}
+            Sign up to
             <Link to='/'>Budget Planner</Link>
           </h1>
-          <p>Fill in the form below to login to your account.</p>
+          <p>Fill in the form below to sign up for an account.</p>
           <div>
             <input
               placeholder='Email'
@@ -65,16 +57,12 @@ class Login extends Component {
           </div>
           <div>
             {this.state.error ? <p>{this.state.error}</p> : null}
-            <button type='submit'>Login</button>
+            <button type='submit'>Sign up</button>
           </div>
           <hr />
-          <p>
-            Don't have an account? <Link to='/signup'>Sign up</Link>
-          </p>
-          <p>Or</p>
-          <button onClick={this.handleGoogleSignIn} type='button'>
-            Sign up with Google
-          </button>
+          {/* <p>
+            Already have an account? <Link to='/login'>Log in</Link>
+          </p> */}
         </form>
       </div>
     );
@@ -85,6 +73,6 @@ class Login extends Component {
 
 // const mapDispatchToProps = {};
 
-// export default connect(mapStateToProps, mapDispatchToProps)(Login);
+// export default connect(mapStateToProps, mapDispatchToProps)(Signup);
 
-export default Login;
+export default Signup;
