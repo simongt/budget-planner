@@ -21,7 +21,7 @@ class Signup extends Component {
     }
   };
 
-  handleChange = (event) => {
+  handleChange = event => {
     // dynamically determine the key and set the corresponding state variable
     this.setState({
       [event.target.name]: event.target.value
@@ -60,9 +60,9 @@ class Signup extends Component {
             <button type='submit'>Sign up</button>
           </div>
           <hr />
-          <p>
+          {/* <p>
             Already have an account? <Link to='/login'>Log in</Link>
-          </p>
+          </p> */}
         </form>
       </div>
     );

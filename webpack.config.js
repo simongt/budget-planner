@@ -9,6 +9,8 @@ const config = {
     path: path.resolve(__dirname, './dist'),
     filename: 'bundle.js'
   },
+  context: __dirname,
+  target: 'web',
   module: {
     rules: [
       {
@@ -19,6 +21,60 @@ const config = {
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader']
+      },
+      {
+        test: /\.scss$/,
+        loader: 'style-loader!css-loader!sass-loader'
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/fonts/'
+            }
+          }
+        ]
+      },
+      // {
+      //   test: /\.(jpg|png|gif)$/,
+      //   use: [
+      //     {
+      //       loader: 'url-loader',
+      //       options: {
+      //         limit: 2048,
+      //         name: '[name].[ext]',
+      //         outputPath: 'assets/images/'
+      //       }
+      //     }
+      //   ]
+      // },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/images/',
+              esModule: false
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(svg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/svg/'
+            }
+          }
+        ]
       }
     ]
   },
@@ -36,10 +92,15 @@ const config = {
       title: 'Budget Planner',
       appMountId: 'app',
       filename: 'index.html',
-      template: 'src/index.html'
+      template: 'src/static/index.html'
     }),
     new MiniCssExtractPlugin()
-  ]
+  ],
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  }
 };
 
 module.exports = config;
