@@ -6,6 +6,7 @@ import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-d
 // import { connect } from 'react-redux';
 import { auth } from './services/firebase';
 import { PrivateRoute, PublicRoute, Routes } from './views/Routes';
+import { CircularProgress, LinearProgress } from '@material-ui/core';
 
 class App extends Component {
   constructor(props) {
@@ -34,7 +35,11 @@ class App extends Component {
 
   render() {
     console.log('src/App.js --> render');
-    return this.state.loading ? 'Loading...' : <Routes authenticated={this.state.authenticated} />;
+    return this.state.loading ? (
+      <LinearProgress color='secondary' />
+    ) : (
+      <Routes authenticated={this.state.authenticated} />
+    );
   }
 }
 

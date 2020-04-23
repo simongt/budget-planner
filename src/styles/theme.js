@@ -35,6 +35,20 @@ const rawTheme = createMuiTheme({
     fontWeightRegular: 400, // Work Sans
     fontWeightMedium: 700, // Roboto Condensed
     fontFamilySecondary: "'Roboto Condensed', sans-serif"
+  },
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        body: {
+          // backgroundImage:
+          //   'url(' + require('../static/assets/images/pen-paper-calculator.jpg') + ')',
+          // backgroundRepeat: 'no-repeat',
+          // backgroundPosition: 'center center',
+          // backgroundSize: 'cover',
+          // backgroundAttachment: 'fixed'
+        }
+      }
+    }
   }
 });
 
