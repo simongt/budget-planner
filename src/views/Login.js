@@ -1,9 +1,9 @@
 import withRoot from '../lib/withRoot';
 import React, { Component, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { Field, Form, FormSpy } from 'react-final-form';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import {
   Link as MuiLink,
   CircularProgress,
@@ -34,7 +34,11 @@ import { auth, signinWithGoogle } from '../services/firebase';
 import 'react-toastify/dist/ReactToastify.css';
 
 // constants
-const MAX_BUDGET = 250000;
+const MIN_ELECTION = 1;
+const MAX_ELECTION = 30; // <= 30%
+const MIN_ANNUAL_SALARY = 1;
+const MAX_ANNUAL_SALARY = 1000000000; // <= $1B
+
 const currencies = [
   {
     value: 'USD',
@@ -54,9 +58,38 @@ const currencies = [
   }
 ];
 
+const SliderTooltip = withStyles(theme => ({
+  tooltip: {
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    color: 'rgba(255, 255, 255, 0.95)',
+    boxShadow: theme.shadows[1],
+    fontSize: 12,
+    marginTop: 25
+  },
+  arrow: {
+    color: 'rgba(0, 0, 0, 0.75)'
+  }
+}))(Tooltip);
+
+const InputTooltip = withStyles(theme => ({
+  tooltip: {
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    color: 'rgba(255, 255, 255, 0.95)',
+    boxShadow: theme.shadows[1],
+    fontSize: 12
+  },
+  arrow: {
+    color: 'rgba(0, 0, 0, 0.75)'
+  }
+}))(Tooltip);
+
+const InputSpacer = () => <span style={{ width: 8, height: 48 }}></span>;
+
 class Login extends Component {
   constructor(props) {
     super(props);
+
+    this.autoClearTooltips = null;
 
     this.state = {
       loading: true,
@@ -71,10 +104,15 @@ class Login extends Component {
       showPassword: false,
       classes: null,
       sent: false,
-      sliderMarks: [],
-      sliderValue: 100000,
-      replaceWithInput: false,
-      sliderTooltipIsOpen: false,
+      electedExpense: 15,
+      electedExpenseSliderMarks: [],
+      electedExpenseInputMode: false,
+      electedExpenseTooltipVisible: true,
+      annualSalary: 100000,
+      annualSalaryInputMode: false,
+      annualSalaryTooltipVisible: true,
+      budgetFormSubmitted: false,
+      sliderTooltipVisible: false,
       currency: {
         value: 'USD',
         label: '$'
@@ -84,20 +122,23 @@ class Login extends Component {
 
   componentDidMount = () => {
     console.log('Login --> componentDidMount', this.props);
-    const sliderMarks = [];
-    let value = MAX_BUDGET;
-    while (value >= 0) {
-      sliderMarks.push({
-        value,
-        label: this.abbreviateValue(value)
-      });
-      value -= 25000; // TODO: make responsive, wider screen should see more slider marks
+    const electedExpenseSliderMarks = [];
+    let election = MAX_ELECTION;
+    while (election >= MIN_ELECTION) {
+      // TODO: better responsivity: show less/more marks on narrow/wide screens by adjusting % N
+      if (election % 5 === 0 || election === MIN_ELECTION || election === MAX_ELECTION) {
+        electedExpenseSliderMarks.push({
+          value: election,
+          label: election + '%'
+        });
+      }
+      election--;
     }
     this.setState(
       {
         authenticated: this.props.authenticated,
         user: this.props.authenticated ? auth().currentUser : null,
-        sliderMarks,
+        electedExpenseSliderMarks,
         classes: makeStyles(theme => ({
           form: {
             marginTop: theme.spacing(6)
@@ -118,12 +159,28 @@ class Login extends Component {
         }))
       },
       () => {
-        this.setState({ loading: false });
+        this.setState({ loading: false }, () => {
+          if (!this.state.electedExpenseInputMode && !this.state.annualSalaryInputMode) {
+            this.autoClearTooltips = setTimeout(() => {
+              this.setState({
+                electedExpenseTooltipVisible: false,
+                annualSalaryTooltipVisible: false
+              });
+            }, 5000);
+          }
+        });
       }
     );
   };
 
-  validate = values => {
+  componentWillUnmount = () => {
+    if (this.autoClearTooltips) {
+      clearTimeout(this.autoClearTooltips);
+      this.autoClearTooltips = null;
+    }
+  };
+
+  validateForm = values => {
     const errors = required(['email', 'password'], values);
     if (!errors.email) {
       const emailError = email(values.email, values);
@@ -172,7 +229,12 @@ class Login extends Component {
             showPassword: false,
             // classes: null,
             sent: false,
-            sliderTooltipIsOpen: false
+            sliderTooltipVisible: false,
+            electedExpenseInputMode: false,
+            electedExpenseTooltipVisible: false,
+            annualSalaryInputMode: false,
+            annualSalaryTooltipVisible: false,
+            budgetFormSubmitted: false
           });
         })
         .catch(error => {
@@ -245,7 +307,8 @@ class Login extends Component {
     });
   };
 
-  abbreviateValue = value => {
+  abbreviateUsdFormat = value => {
+    // TODO: refactor to use decimals s.t. $101,500 becomes $101.5k, not $101k
     if (value === 0) {
       return `${this.state.currency.label}0`;
     } else if (value < 1000) {
@@ -267,6 +330,51 @@ class Login extends Component {
     return '$' + dollarsAndCents.join('.');
   };
 
+  validateSliderExpense = (value = MIN_ELECTION) => {
+    // TODO: round percent value to two decimal places
+    if (value > MAX_ELECTION) {
+      toast.error(`💸 The maximum election allowed is ${MAX_ELECTION}%.`);
+      return MAX_ELECTION;
+    } else if (value >= MIN_ELECTION) {
+      return value;
+    } else {
+      toast.error(`💸 The minimum election allowed is ${MIN_ELECTION}%.`);
+      return MIN_ELECTION;
+    }
+  };
+
+  validateSalary = (value = MIN_ANNUAL_SALARY) => {
+    // TODO: round dollar value to two decimal places
+    if (value > MAX_ANNUAL_SALARY) {
+      toast.error(
+        `💸 The maximum salary allowed is ${this.abbreviateUsdFormat(MAX_ANNUAL_SALARY)}.`
+      );
+      return MAX_ANNUAL_SALARY;
+    } else if (value >= MIN_ANNUAL_SALARY) {
+      return value;
+    } else {
+      toast.error(
+        `💸 The minimum salary allowed is ${this.abbreviateUsdFormat(MIN_ANNUAL_SALARY)}.`
+      );
+      return MIN_ANNUAL_SALARY;
+    }
+  };
+
+  handleBudgetFormSubmit = event => {
+    console.log('Login --> handleLoginPress');
+    event.preventDefault();
+    this.setState({ error: '', budgetFormSubmitted: true }, () => {
+      toast.info(
+        `Calculating expense report for ${this.abbreviateUsdFormat(
+          this.state.annualSalary
+        )} salary with ${this.state.electedExpense}% election.`
+      );
+      setTimeout(() => {
+        this.setState({ budgetFormSubmitted: false });
+      }, 1500);
+    });
+  };
+
   render() {
     const {
       loading,
@@ -279,9 +387,15 @@ class Login extends Component {
       classes,
       sent,
       oauthLoginPressed,
-      sliderMarks,
-      sliderValue,
-      replaceWithInput
+      currency,
+      electedExpenseSliderMarks,
+      electedExpense,
+      electedExpenseInputMode,
+      electedExpenseTooltipVisible,
+      annualSalary,
+      annualSalaryInputMode,
+      annualSalaryTooltipVisible,
+      budgetFormSubmitted
     } = this.state;
     return loading ? (
       <LinearProgress color='secondary' />
@@ -294,8 +408,21 @@ class Login extends Component {
           logout={this.handleLogoutPress}
         />
         {authenticated ? (
-          <Fragment>
-            <div style={{ marginTop: 36, marginBottom: 36 }}>
+          <div
+          // style={{
+          //   display: 'grid',
+          //   placeItems: 'center'
+          // }}
+          >
+            <div
+              style={{
+                // display: 'grid',
+                // placeItems: 'center',
+                // maxWidth: 840,
+                marginTop: 36,
+                marginBottom: 36
+              }}
+            >
               <div style={{ marginBottom: 36 }}>
                 <Typography variant='h5' gutterBottom align='center'>
                   <span
@@ -303,12 +430,147 @@ class Login extends Component {
                   >{`Welcome to your monthly budget${', ' + this.getUserName()}!`}</span>
                 </Typography>
               </div>
+              {/* Budget Form */}
               <Fragment>
+                {/* Elected Expense */}
+                <div
+                  style={{
+                    // display: 'grid',
+                    // placeItems: 'center',
+                    // minWidth: 640,
+                    // maxWidth: 960,
+                    paddingLeft: 48,
+                    paddingRight: 48,
+                    marginBottom: 64
+                  }}
+                >
+                  <div
+                    style={{
+                      marginBottom: 36,
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'flex-end'
+                    }}
+                  >
+                    <Typography variant='h5' gutterBottom>
+                      {`How much of your salary will you contribute to elected expenses?`}
+                    </Typography>
+                    <InputSpacer />
+                    {electedExpenseInputMode ? (
+                      <Fragment>
+                        {/* TODO: implement tab to switch focus between text input fields */}
+                        <TextField
+                          autoFocus
+                          name='electedExpense'
+                          className='electedExpense'
+                          required
+                          value={electedExpense || MIN_ELECTION}
+                          onKeyDown={event => {
+                            event.persist();
+                            this.setState(prevState => ({
+                              electedExpenseInputMode: event.keyCode !== 13
+                            }));
+                          }}
+                          onChange={event => {
+                            event.persist();
+                            this.setState(prevState => ({
+                              ...prevState,
+                              [event.target.name]: this.validateSliderExpense(
+                                event.target.value || MIN_ELECTION
+                              )
+                            }));
+                          }}
+                          onFocus={event => event.target.select()}
+                          onBlur={() =>
+                            this.setState(prevState => ({
+                              electedExpenseInputMode: false
+                            }))
+                          }
+                          color='secondary'
+                          margin='dense'
+                          size='small'
+                          type='number'
+                          placeholder={`${MIN_ELECTION}`}
+                        />
+                        <Typography variant='h5' gutterBottom>
+                          <span style={{ fontWeight: 'bold' }}>%</span>
+                        </Typography>
+                      </Fragment>
+                    ) : (
+                      <div
+                        onClick={() =>
+                          this.setState(prevState => ({
+                            electedExpenseInputMode: !prevState.electedExpenseInputMode,
+                            electedExpenseTooltipVisible: false
+                          }))
+                        }
+                      >
+                        <Typography variant='h5' gutterBottom>
+                          <InputTooltip
+                            open={electedExpenseTooltipVisible}
+                            // onOpen={handleTooltipOpen}
+                            // onClose={handleTooltipClose}
+                            title='Press to enter new value.'
+                            aria-label='Budget Slider'
+                            placement='right'
+                            disableFocusListener
+                            // disableHoverListener
+                            disableTouchListener
+                            arrow
+                          >
+                            <span style={{ fontWeight: 'bold' }}>{electedExpense}%</span>
+                          </InputTooltip>
+                        </Typography>
+                      </div>
+                    )}
+                  </div>
+                  <SliderTooltip
+                    // open={sliderTooltipVisible}
+                    // onOpen={handleTooltipOpen}
+                    // onClose={handleTooltipClose}
+                    title='Drag slider to adjust value.'
+                    aria-label='Budget Slider'
+                    placement='bottom'
+                    disableFocusListener
+                    // disableHoverListener
+                    disableTouchListener
+                    arrow
+                  >
+                    <Slider
+                      color='secondary'
+                      track={false}
+                      name='budget'
+                      min={MIN_ELECTION}
+                      max={Math.max(electedExpense, MAX_ELECTION)}
+                      // defaultValue={electedExpense}
+                      value={this.state.electedExpense || MIN_ELECTION} // TODO: load on auth
+                      valueLabelFormat={value => value + '%'}
+                      step={1}
+                      onChange={(event, value) =>
+                        this.setState({
+                          electedExpense: value,
+                          electedExpenseInputMode: false
+                        })
+                      }
+                      // onChangeCommitted={(event, value) => this.setState({ electedExpense: value })}
+                      marks={electedExpenseSliderMarks}
+                      valueLabelDisplay='on'
+                      aria-label='Budget Slider'
+                      aria-labelledby='budget-slider'
+                      aria-valuetext={electedExpense + '%'}
+                      getAriaLabel={value => `${value}%`}
+                      getAriaValueText={value => `${value}%`}
+                    />
+                  </SliderTooltip>
+                </div>
+
                 {/* Annual Salary */}
                 <div
                   style={{
-                    minWidth: 640,
-                    // maxWidth: 1280,
+                    // display: 'grid',
+                    // placeItems: 'center',
+                    // minWidth: 640,
+                    // maxWidth: 960,
                     paddingLeft: 48,
                     paddingRight: 48,
                     marginBottom: 64
@@ -325,44 +587,59 @@ class Login extends Component {
                     <Typography variant='h5' gutterBottom>
                       {`What's your annual salary?`}
                     </Typography>
-                    <span style={{ width: 8, height: 48 }}></span>
-                    {replaceWithInput ? (
-                      <TextField
-                        autoFocus
-                        name='sliderValue'
-                        className='currency-value'
-                        required
-                        value={sliderValue || 0}
-                        onChange={event => {
-                          event.persist();
-                          this.setState(prevState => ({
-                            ...prevState,
-                            [event.target.name]: event.target.value
-                          }));
-                        }}
-                        onFocus={event => event.target.select()}
-                        onBlur={() =>
-                          this.setState(prevState => ({
-                            replaceWithInput: !prevState.replaceWithInput
-                          }))
-                        }
-                        color='secondary'
-                        margin='dense'
-                        size='small'
-                        type='number'
-                        placeholder='0'
-                      />
+                    <InputSpacer />
+                    {annualSalaryInputMode ? (
+                      <Fragment>
+                        <Typography variant='h5' gutterBottom>
+                          <span style={{ fontWeight: 'bold' }}>{currency.label}</span>
+                        </Typography>
+                        {/* TODO: implement tab to switch focus between text input fields */}
+                        <TextField
+                          autoFocus
+                          name='annualSalary'
+                          className='annualSalary'
+                          required
+                          value={annualSalary || MIN_ANNUAL_SALARY}
+                          onKeyDown={event => {
+                            event.persist();
+                            this.setState(prevState => ({
+                              annualSalaryInputMode: event.keyCode !== 13
+                            }));
+                          }}
+                          onChange={event => {
+                            event.persist();
+                            this.setState(prevState => ({
+                              ...prevState,
+                              [event.target.name]: this.validateSalary(
+                                event.target.value || MIN_ANNUAL_SALARY
+                              )
+                            }));
+                          }}
+                          onFocus={event => event.target.select()}
+                          onBlur={() =>
+                            this.setState(prevState => ({
+                              annualSalaryInputMode: false
+                            }))
+                          }
+                          color='secondary'
+                          margin='dense'
+                          size='small'
+                          type='number'
+                          placeholder={`${MIN_ANNUAL_SALARY}`}
+                        />
+                      </Fragment>
                     ) : (
                       <div
                         onClick={() =>
                           this.setState(prevState => ({
-                            replaceWithInput: !prevState.replaceWithInput
+                            annualSalaryInputMode: !prevState.annualSalaryInputMode,
+                            annualSalaryTooltipVisible: false
                           }))
                         }
                       >
                         <Typography variant='h5' gutterBottom>
-                          <Tooltip
-                            // open={sliderTooltipIsOpen}
+                          <InputTooltip
+                            open={annualSalaryTooltipVisible}
                             // onOpen={handleTooltipOpen}
                             // onClose={handleTooltipClose}
                             title='Press to enter new value.'
@@ -374,278 +651,34 @@ class Login extends Component {
                             arrow
                           >
                             <span style={{ fontWeight: 'bold' }}>
-                              {this.usdFormat(sliderValue)}
+                              {this.usdFormat(annualSalary)}
                             </span>
-                          </Tooltip>
+                          </InputTooltip>
                         </Typography>
                       </div>
                     )}
                   </div>
-                  <Tooltip
-                    // open={sliderTooltipIsOpen}
-                    // onOpen={handleTooltipOpen}
-                    // onClose={handleTooltipClose}
-                    title='Drag slider to adjust value.'
-                    aria-label='Budget Slider'
-                    placement='top'
-                    disableFocusListener
-                    // disableHoverListener
-                    disableTouchListener
-                    arrow
-                  >
-                    <Slider
-                      color='secondary'
-                      track={false}
-                      name='budget'
-                      min={sliderValue > 250000 ? sliderValue - 250000 : 0}
-                      max={Math.max(sliderValue, MAX_BUDGET)}
-                      // defaultValue={sliderValue}
-                      value={this.state.sliderValue || 0} // TODO: load on auth
-                      valueLabelFormat={value => this.abbreviateValue(value)}
-                      step={500}
-                      onChange={(event, value) =>
-                        this.setState({ sliderValue: value, replaceWithInput: false })
-                      }
-                      // onChangeCommitted={(event, value) => this.setState({ sliderValue: value })}
-                      marks={sliderMarks}
-                      valueLabelDisplay='on'
-                      aria-label='Budget Slider'
-                      aria-labelledby='budget-slider'
-                      aria-valuetext={this.abbreviateValue(sliderValue)}
-                      getAriaLabel={value => `${value}`}
-                      getAriaValueText={value => `${value}`}
-                    />
-                  </Tooltip>
                 </div>
-                {/* Monthly Expenses */}
-                <div
-                  style={{
-                    minWidth: 640,
-                    // maxWidth: 1280,
-                    paddingLeft: 48,
-                    paddingRight: 48,
-                    marginBottom: 64
-                  }}
-                >
-                  <div
-                    style={{
-                      marginBottom: 36,
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'flex-end'
-                    }}
+                {/* Submit Budget */}
+                <div>
+                  <Button
+                    aria-label='Submit Budget Form'
+                    onClick={this.handleBudgetFormSubmit}
+                    disabled={budgetFormSubmitted}
+                    type='button'
+                    variant='contained'
+                    className={classes.button}
+                    size='large'
+                    // color='secondary'
+                    color='secondary'
+                    fullWidth
                   >
-                    <Typography variant='h5' gutterBottom>
-                      {`What is the total amount of your monthly expenses?`}
-                    </Typography>
-                    <span style={{ width: 8, height: 48 }}></span>
-                    {replaceWithInput ? (
-                      <TextField
-                        autoFocus
-                        name='sliderValue'
-                        className='currency-value'
-                        required
-                        value={sliderValue || 0}
-                        onChange={event => {
-                          event.persist();
-                          this.setState(prevState => ({
-                            ...prevState,
-                            [event.target.name]: event.target.value
-                          }));
-                        }}
-                        onFocus={event => event.target.select()}
-                        onBlur={() =>
-                          this.setState(prevState => ({
-                            replaceWithInput: !prevState.replaceWithInput
-                          }))
-                        }
-                        color='secondary'
-                        margin='dense'
-                        size='small'
-                        type='number'
-                        placeholder='0'
-                      />
-                    ) : (
-                      <div
-                        onClick={() =>
-                          this.setState(prevState => ({
-                            replaceWithInput: !prevState.replaceWithInput
-                          }))
-                        }
-                      >
-                        <Typography variant='h5' gutterBottom>
-                          <Tooltip
-                            // open={sliderTooltipIsOpen}
-                            // onOpen={handleTooltipOpen}
-                            // onClose={handleTooltipClose}
-                            title='Press to enter new value.'
-                            aria-label='Budget Slider'
-                            placement='right'
-                            disableFocusListener
-                            // disableHoverListener
-                            disableTouchListener
-                            arrow
-                          >
-                            <span style={{ fontWeight: 'bold' }}>
-                              {this.usdFormat(sliderValue)}
-                            </span>
-                          </Tooltip>
-                        </Typography>
-                      </div>
-                    )}
-                  </div>
-                  <Tooltip
-                    // open={sliderTooltipIsOpen}
-                    // onOpen={handleTooltipOpen}
-                    // onClose={handleTooltipClose}
-                    title='Drag slider to adjust value.'
-                    aria-label='Budget Slider'
-                    placement='top'
-                    disableFocusListener
-                    // disableHoverListener
-                    disableTouchListener
-                    arrow
-                  >
-                    <Slider
-                      color='secondary'
-                      track={false}
-                      name='budget'
-                      min={sliderValue > 250000 ? sliderValue - 250000 : 0}
-                      max={Math.max(sliderValue, MAX_BUDGET)}
-                      // defaultValue={sliderValue}
-                      value={this.state.sliderValue || 0} // TODO: load on auth
-                      valueLabelFormat={value => this.abbreviateValue(value)}
-                      step={500}
-                      onChange={(event, value) =>
-                        this.setState({ sliderValue: value, replaceWithInput: false })
-                      }
-                      // onChangeCommitted={(event, value) => this.setState({ sliderValue: value })}
-                      marks={sliderMarks}
-                      valueLabelDisplay='on'
-                      aria-label='Budget Slider'
-                      aria-labelledby='budget-slider'
-                      aria-valuetext={this.abbreviateValue(sliderValue)}
-                      getAriaLabel={value => `${value}`}
-                      getAriaValueText={value => `${value}`}
-                    />
-                  </Tooltip>
-                </div>
-                {/* Savings */}
-                <div
-                  style={{
-                    minWidth: 640,
-                    // maxWidth: 1280,
-                    paddingLeft: 48,
-                    paddingRight: 48,
-                    marginBottom: 64
-                  }}
-                >
-                  <div
-                    style={{
-                      marginBottom: 36,
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'flex-end'
-                    }}
-                  >
-                    <Typography variant='h5' gutterBottom>
-                      {`What is the total amount of your savings?`}
-                    </Typography>
-                    <span style={{ width: 8, height: 48 }}></span>
-                    {replaceWithInput ? (
-                      <TextField
-                        autoFocus
-                        name='sliderValue'
-                        className='currency-value'
-                        required
-                        value={sliderValue || 0}
-                        onChange={event => {
-                          event.persist();
-                          this.setState(prevState => ({
-                            ...prevState,
-                            [event.target.name]: event.target.value
-                          }));
-                        }}
-                        onFocus={event => event.target.select()}
-                        onBlur={() =>
-                          this.setState(prevState => ({
-                            replaceWithInput: !prevState.replaceWithInput
-                          }))
-                        }
-                        color='secondary'
-                        margin='dense'
-                        size='small'
-                        type='number'
-                        placeholder='0'
-                      />
-                    ) : (
-                      <div
-                        onClick={() =>
-                          this.setState(prevState => ({
-                            replaceWithInput: !prevState.replaceWithInput
-                          }))
-                        }
-                      >
-                        <Typography variant='h5' gutterBottom>
-                          <Tooltip
-                            // open={sliderTooltipIsOpen}
-                            // onOpen={handleTooltipOpen}
-                            // onClose={handleTooltipClose}
-                            title='Press to enter new value.'
-                            aria-label='Budget Slider'
-                            placement='right'
-                            disableFocusListener
-                            // disableHoverListener
-                            disableTouchListener
-                            arrow
-                          >
-                            <span style={{ fontWeight: 'bold' }}>
-                              {this.usdFormat(sliderValue)}
-                            </span>
-                          </Tooltip>
-                        </Typography>
-                      </div>
-                    )}
-                  </div>
-                  <Tooltip
-                    // open={sliderTooltipIsOpen}
-                    // onOpen={handleTooltipOpen}
-                    // onClose={handleTooltipClose}
-                    title='Drag slider to adjust value.'
-                    aria-label='Budget Slider'
-                    placement='top'
-                    disableFocusListener
-                    // disableHoverListener
-                    disableTouchListener
-                    arrow
-                  >
-                    <Slider
-                      color='secondary'
-                      track={false}
-                      name='budget'
-                      min={sliderValue > 250000 ? sliderValue - 250000 : 0}
-                      max={Math.max(sliderValue, MAX_BUDGET)}
-                      // defaultValue={sliderValue}
-                      value={this.state.sliderValue || 0} // TODO: load on auth
-                      valueLabelFormat={value => this.abbreviateValue(value)}
-                      step={500}
-                      onChange={(event, value) =>
-                        this.setState({ sliderValue: value, replaceWithInput: false })
-                      }
-                      // onChangeCommitted={(event, value) => this.setState({ sliderValue: value })}
-                      marks={sliderMarks}
-                      valueLabelDisplay='on'
-                      aria-label='Budget Slider'
-                      aria-labelledby='budget-slider'
-                      aria-valuetext={this.abbreviateValue(sliderValue)}
-                      getAriaLabel={value => `${value}`}
-                      getAriaValueText={value => `${value}`}
-                    />
-                  </Tooltip>
+                    {budgetFormSubmitted ? 'In progress…' : 'Submit'}
+                  </Button>
                 </div>
               </Fragment>
             </div>
-          </Fragment>
+          </div>
         ) : (
           <Fragment>
             <AppForm>
@@ -668,7 +701,7 @@ class Login extends Component {
               <Form
                 onSubmit={this.handleLoginPress}
                 subscription={{ submitting: true }}
-                validate={this.validate}
+                validateForm={this.validateForm}
               >
                 {({ handleSubmit, submitting }) => (
                   <form onSubmit={handleSubmit} className={classes.form} /* noValidate */>
