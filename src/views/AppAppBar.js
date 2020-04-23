@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
+import { toast } from 'react-toastify';
 import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
@@ -36,6 +37,18 @@ const styles = theme => ({
     color: theme.palette.secondary.main
   }
 });
+
+const NavbarTooltip = withStyles(theme => ({
+  tooltip: {
+    backgroundColor: 'rgba(230,41,88, 0.75)',
+    color: 'rgba(255, 255, 255, 0.95)',
+    boxShadow: theme.shadows[1],
+    fontSize: 12
+  },
+  arrow: {
+    color: 'rgba(230,41,88, 0.75)'
+  }
+}))(Tooltip);
 
 function AppAppBar(props) {
   const { classes, authenticated, oauthLogin, logout } = props;
@@ -74,23 +87,34 @@ function AppAppBar(props) {
           <div className={classes.right}>
             {authenticated ? (
               <Fragment>
-                <Link
-                  color='inherit'
-                  variant='h6'
-                  underline='none'
-                  className={classes.rightLink}
-                  onClick={logout}
+                <NavbarTooltip
+                  title='Sign out of account.'
+                  placement='right'
+                  aria-label='Sign-out'
+                  disableFocusListener
+                  // disableHoverListener
+                  disableTouchListener
+                  arrow
                 >
-                  {'Log Out'}
-                </Link>
+                  <Link
+                    color='inherit'
+                    variant='h6'
+                    underline='none'
+                    className={classes.rightLink}
+                    onClick={logout}
+                  >
+                    {'Log Out'}
+                  </Link>
+                </NavbarTooltip>
               </Fragment>
             ) : (
               <Fragment>
-                <Tooltip
+                <NavbarTooltip
                   open={tooltipIsOpen}
                   onOpen={handleTooltipOpen}
                   onClose={handleTooltipClose}
                   title='Sign in to get started.'
+                  placement='right'
                   aria-label='Google sign-in'
                   disableFocusListener
                   // disableHoverListener
@@ -107,7 +131,7 @@ function AppAppBar(props) {
                   >
                     {'Sign In'}
                   </Link>
-                </Tooltip>
+                </NavbarTooltip>
                 <Link
                   aria-label='Sign up with email'
                   variant='h6'
