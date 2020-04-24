@@ -256,24 +256,33 @@ class Login extends Component {
     return errors;
   };
 
-  handleLoginPress = () => {
-    console.log('Login --> handleLoginPress');
+  handleLoginPress = values => {
+    console.log('Login --> handleLoginPress', values);
     event.preventDefault();
-    this.setState({ error: '', emailLoginPressed: true, sent: true }, () => {
-      auth()
-        .signInWithEmailAndPassword(this.state.email, this.state.password)
-        .then(result => {
-          console.log(result);
-          toast.success('👍 Email sign-in successful.');
-          this.setState({ user: auth().currentUser, emailLoginPressed: false });
-        })
-        .catch(error => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          toast.error('🧐' + error.message);
-          this.setState({ error: error.message, emailLoginPressed: false });
-        });
-    });
+    this.setState(
+      {
+        error: '',
+        email: values.email,
+        password: values.password,
+        emailLoginPressed: true,
+        sent: true
+      },
+      () => {
+        auth()
+          .signInWithEmailAndPassword(this.state.email, this.state.password)
+          .then(result => {
+            console.log(result);
+            toast.success('👍 Email sign-in successful.');
+            this.setState({ user: auth().currentUser, emailLoginPressed: false, sent: false });
+          })
+          .catch(error => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            toast.error('🧐' + error.message);
+            this.setState({ error: error.message, emailLoginPressed: false, sent: false });
+          });
+      }
+    );
   };
 
   handleLogoutPress = () => {
@@ -407,7 +416,12 @@ class Login extends Component {
     }
   };
 
-  getUserName = () => this.state.user.displayName.split(' ')[0];
+  getUserName = () =>
+    this.state.user.displayName
+      ? this.state.user.displayName.split(' ')[0].charAt(0).toUpperCase() +
+        this.state.user.displayName.split(' ')[0].slice(1).toLowerCase()
+      : this.state.user.email.split('@')[0].charAt(0).toUpperCase() +
+        this.state.user.email.split('@')[0].slice(1).toLowerCase();
 
   usdFormat = (value = 0) => {
     const dollarsAndCents = parseFloat(value).toFixed(2).split('.'); // [0]: dollars, [1]: cents
@@ -509,7 +523,7 @@ class Login extends Component {
               >
                 <div style={{ marginBottom: 36 }}>
                   <Typography variant='h5' gutterBottom align='center'>
-                    <span style={{ fontWeight: 'bold' }}>{`Here's your expense report${
+                    <span style={{ fontWeight: 'bold' }}>{`Here's your budget analyis${
                       ', ' + this.getUserName()
                     }.`}</span>
                     <br />
@@ -1024,7 +1038,7 @@ class Login extends Component {
                   </MuiLink>
                 </Typography>
                 <Typography variant='body2' align='center'>
-                  <MuiLink underline='always' href='/premium-themes/onepirate/forgot-password/'>
+                  <MuiLink underline='always' href='/forgot-password'>
                     Forgot password?
                   </MuiLink>
                 </Typography>
@@ -1032,10 +1046,11 @@ class Login extends Component {
               <Form
                 onSubmit={this.handleLoginPress}
                 subscription={{ submitting: true }}
-                validateForm={this.validateForm}
+                validate={this.validateForm}
+                onChange={this.handleFormChange}
               >
-                {({ handleSubmit, submitting }) => (
-                  <form onSubmit={handleSubmit} className={classes.form} /* noValidate */>
+                {({ handleSubmit, submitting, onChange }) => (
+                  <form onSubmit={handleSubmit} className={classes.form} noValidate>
                     <Field
                       autoComplete='email'
                       autoFocus
