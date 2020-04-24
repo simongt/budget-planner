@@ -1,3 +1,5 @@
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms)); // await sleep(300);
+
 /*!
  * Find the differences between two objects and push to a new object
  * (c) 2019 Chris Ferdinandi & Jascha Brinkmann, MIT License
@@ -118,4 +120,4 @@ var getDifferenceBetweenObjects = function (obj1, obj2) {
   return diffs;
 };
 
-export { getDifferenceBetweenObjects };
+export { sleep, getDifferenceBetweenObjects };
