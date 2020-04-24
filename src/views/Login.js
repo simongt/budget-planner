@@ -28,7 +28,6 @@ import RFTextField from '../components/form/RFTextField';
 import FormButton from '../components/form/FormButton';
 import FormFeedback from '../components/form/FormFeedback';
 import { email, required } from '../components/form/validation';
-
 // import { connect } from 'react-redux';
 import { auth, signinWithGoogle } from '../services/firebase';
 import 'react-toastify/dist/ReactToastify.css';
@@ -114,7 +113,7 @@ class Login extends Component {
       monthlyExpenses: null,
       monthlySavings: null,
       budgetFormSubmitted: false,
-      sliderTooltipVisible: false,
+      sliderTooltipVisible: true,
       currency: {
         value: 'USD',
         label: '$'
@@ -168,7 +167,8 @@ class Login extends Component {
             this.autoClearTooltips = setTimeout(() => {
               this.setState({
                 electedExpenseTooltipVisible: false,
-                annualSalaryTooltipVisible: false
+                annualSalaryTooltipVisible: false,
+                sliderTooltipVisible: false
               });
             }, 5000);
           }
@@ -323,6 +323,26 @@ class Login extends Component {
     });
   };
 
+  handleBudgetFormSubmit = event => {
+    console.log('Login --> handleBudgetFormSubmit');
+    event.preventDefault();
+    this.setState(
+      prevState => ({
+        budgetFormSubmitted: !prevState.budgetFormSubmitted
+      }),
+      () => {
+        // toast.info(
+        //   `Calculating expense report for ${this.abbreviateUsdFormat(
+        //     this.state.annualSalary
+        //   )} salary with ${this.state.election}% election.`
+        // );
+        // setTimeout(() => {
+        //   this.setState({ budgetFormSubmitted: false });
+        // }, 1500);
+      }
+    );
+  };
+
   abbreviateUsdFormat = value => {
     // TODO: refactor to use decimals s.t. $101,500 becomes $101.5k, not $101k
     if (value === 0) {
@@ -340,9 +360,8 @@ class Login extends Component {
 
   getUserName = () => this.state.user.displayName.split(' ')[0];
 
-  usdFormat = value => {
-    // TODO: resolve decimal bug resulting from toFixed
-    const dollarsAndCents = value.toFixed(2).split('.'); // [0]: dollars, [1]: cents
+  usdFormat = (value = 0) => {
+    const dollarsAndCents = parseFloat(value).toFixed(2).split('.'); // [0]: dollars, [1]: cents
     dollarsAndCents[0] = dollarsAndCents[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return dollarsAndCents[1] === '00' ? '$' + dollarsAndCents[0] : '$' + dollarsAndCents.join('.');
   };
@@ -381,21 +400,6 @@ class Login extends Component {
     }
   };
 
-  handleBudgetFormSubmit = event => {
-    console.log('Login --> handleLoginPress');
-    event.preventDefault();
-    this.setState({ error: '', budgetFormSubmitted: true }, () => {
-      toast.info(
-        `Calculating expense report for ${this.abbreviateUsdFormat(
-          this.state.annualSalary
-        )} salary with ${this.state.election}% election.`
-      );
-      // setTimeout(() => {
-      //   this.setState({ budgetFormSubmitted: false });
-      // }, 1500);
-    });
-  };
-
   render() {
     const {
       loading,
@@ -418,7 +422,8 @@ class Login extends Component {
       annualSalaryTooltipVisible,
       monthlyExpenses,
       monthlySavings,
-      budgetFormSubmitted
+      budgetFormSubmitted,
+      sliderTooltipVisible
     } = this.state;
     return loading ? (
       <LinearProgress color='secondary' />
@@ -437,269 +442,470 @@ class Login extends Component {
           //   placeItems: 'center'
           // }}
           >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                // maxWidth: 840,
-                marginTop: 36,
-                marginBottom: 36
-              }}
-            >
-              <div style={{ marginBottom: 36 }}>
-                <Typography variant='h5' gutterBottom align='center'>
-                  <span
-                    style={{ fontSize: 24, fontWeight: '500' }}
-                  >{`Welcome to your monthly budget${', ' + this.getUserName()}!`}</span>
-                </Typography>
-              </div>
-              {/* Budget Form */}
-              <div>
-                <div>
-                  {/* Elected Expense */}
+            {budgetFormSubmitted ? (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  // maxWidth: 840,
+                  marginTop: 36,
+                  marginBottom: 36
+                }}
+              >
+                <div style={{ marginBottom: 36 }}>
+                  <Typography variant='h5' gutterBottom align='center'>
+                    <span style={{ fontWeight: 'bold' }}>{`Here's your expense report${
+                      ', ' + this.getUserName()
+                    }.`}</span>
+                    <br />
+                    Happy savings!
+                  </Typography>
+                </div>
+
+                {/* Expense Report + Back Button */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    alignContent: 'stretch',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {/* TODO: add pie chart */}
+                  {/* Expense Report */}
+                  <div
+                    style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+                  >
+                    {/* Elected Expense */}
+                    <Typography variant='h5' gutterBottom>
+                      <div
+                        style={{
+                          width: 320,
+                          marginBottom: 0,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'stretch',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <span style={{}}>{`Election`}</span>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                          <span style={{ fontWeight: 'bold' }}>{election}%</span>
+                        </div>
+                      </div>
+                    </Typography>
+
+                    {/* Annual Salary */}
+                    <Typography variant='h5' gutterBottom>
+                      <div
+                        style={{
+                          width: 320,
+                          marginBottom: 0,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'stretch',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <span style={{}}>{`Annual Salary`}</span>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                          <span style={{ fontWeight: 'bold' }}>{this.usdFormat(annualSalary)}</span>
+                        </div>
+                      </div>
+                    </Typography>
+
+                    {/* Monthly Expenses */}
+                    <Typography variant='h5' gutterBottom>
+                      <div
+                        style={{
+                          width: 320,
+                          marginBottom: 0,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'stretch',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <span style={{}}>{`Monthly Expenses`}</span>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                          <span style={{ fontWeight: 'bold' }}>{monthlyExpenses}</span>
+                        </div>
+                      </div>
+                    </Typography>
+
+                    {/* Monthly Savings */}
+                    <Typography variant='h5' gutterBottom>
+                      <div
+                        style={{
+                          width: 320,
+                          marginBottom: 0,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'stretch',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <span style={{}}>{`Monthly Savings`}</span>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                          <span style={{ fontWeight: 'bold' }}>{monthlySavings}</span>
+                        </div>
+                      </div>
+                    </Typography>
+                  </div>
+
+                  {/* Unsubmit */}
                   <div
                     style={{
-                      // display: 'grid',
-                      // placeItems: 'center',
+                      display: 'flex',
+                      justifyContent: 'space-around',
                       // minWidth: 640,
                       // maxWidth: 960,
+                      marginTop: 32,
                       paddingLeft: 48,
                       paddingRight: 48,
                       marginBottom: 64
                     }}
                   >
+                    <Button
+                      aria-label='Go Back'
+                      onClick={this.handleBudgetFormSubmit}
+                      disabled={!budgetFormSubmitted}
+                      type='button'
+                      variant='contained'
+                      className={classes.button}
+                      size='large'
+                      // color='secondary'
+                      color='primary'
+                      fullWidth
+                    >
+                      {!budgetFormSubmitted ? 'In progress…' : 'Back'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  // maxWidth: 840,
+                  marginTop: 36,
+                  marginBottom: 36
+                }}
+              >
+                <div style={{ marginBottom: 36 }}>
+                  <Typography variant='h5' gutterBottom align='center'>
+                    <span style={{ fontWeight: 'bold' }}>{`Welcome${
+                      ', ' + this.getUserName()
+                    }!`}</span>
+                    <br />
+                    Let's analyze your monthly budget.
+                  </Typography>
+                </div>
+                {/* Budget Form */}
+                <div>
+                  <div>
+                    {/* Elected Expense */}
                     <div
                       style={{
-                        marginBottom: 36,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        flexDirection: 'row',
-                        alignItems: 'flex-end'
+                        // display: 'grid',
+                        // placeItems: 'center',
+                        // minWidth: 640,
+                        // maxWidth: 960,
+                        paddingLeft: 48,
+                        paddingRight: 48,
+                        marginBottom: 64
                       }}
                     >
-                      <Typography variant='h5' gutterBottom>
-                        {`How much of your salary will you contribute to elected expenses?`}
-                      </Typography>
-                      <InputSpacer />
-                      {electedExpenseInputMode ? (
-                        <div>
-                          {/* TODO: replace with outlined material ui text fields */}
-                          {/* TODO: implement tab to switch focus between text input fields */}
-                          <div style={{ width: 180, display: 'flex', alignItems: 'center' }}>
+                      <div
+                        style={{
+                          marginBottom: 36,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          flexDirection: 'row',
+                          alignItems: 'flex-end'
+                        }}
+                      >
+                        <Typography variant='h5' gutterBottom>
+                          {`How much of your salary will you contribute to elected expenses?`}
+                        </Typography>
+                        <InputSpacer />
+                        {electedExpenseInputMode ? (
+                          <div>
+                            {/* TODO: replace with outlined material ui text fields */}
+                            {/* TODO: implement tab to switch focus between text input fields */}
+                            <div style={{ width: 180, display: 'flex', alignItems: 'center' }}>
+                              <TextField
+                                autoFocus
+                                name='election'
+                                className='election'
+                                required
+                                value={election || MIN_ELECTION}
+                                onKeyDown={event => {
+                                  event.persist();
+                                  this.setState({
+                                    electedExpenseInputMode: event.keyCode !== 13
+                                  });
+                                }}
+                                onChange={event => {
+                                  event.persist();
+                                  this.setState(prevState => ({
+                                    ...prevState,
+                                    [event.target.name]: this.validateSliderExpense(
+                                      event.target.value || MIN_ELECTION
+                                    )
+                                  }));
+                                }}
+                                onFocus={event => event.target.select()}
+                                onBlur={() =>
+                                  this.setState(prevState => ({
+                                    electedExpenseInputMode: false
+                                  }))
+                                }
+                                color='secondary'
+                                margin='dense'
+                                size='small'
+                                type='number'
+                                placeholder={`${MIN_ELECTION}`}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              width: 180,
+                              display: 'flex',
+                              justifyContent: 'flex-end',
+                              alignItems: 'center'
+                            }}
+                            onClick={() =>
+                              this.setState(prevState => ({
+                                electedExpenseInputMode: !prevState.electedExpenseInputMode,
+                                electedExpenseTooltipVisible: false
+                              }))
+                            }
+                          >
+                            <Typography variant='h5' gutterBottom>
+                              <InputTooltip
+                                open={electedExpenseTooltipVisible}
+                                // onOpen={handleTooltipOpen}
+                                // onClose={handleTooltipClose}
+                                title='Press to enter new value.'
+                                aria-label='Budget Slider'
+                                placement='right'
+                                disableFocusListener
+                                // disableHoverListener
+                                disableTouchListener
+                                arrow
+                              >
+                                <span style={{ color: '#e62958', fontWeight: 'bold' }}>
+                                  {election}%
+                                </span>
+                              </InputTooltip>
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                      <SliderTooltip
+                        open={sliderTooltipVisible}
+                        // onOpen={handleTooltipOpen}
+                        // onClose={handleTooltipClose}
+                        title='Drag slider to adjust value.'
+                        aria-label='Budget Slider'
+                        placement='bottom'
+                        disableFocusListener
+                        // disableHoverListener
+                        disableTouchListener
+                        arrow
+                      >
+                        <Slider
+                          color='secondary'
+                          track={false}
+                          name='budget'
+                          min={MIN_ELECTION}
+                          max={Math.max(election, MAX_ELECTION)}
+                          value={election || MIN_ELECTION} // TODO: load on auth
+                          valueLabelFormat={value => value + '%'}
+                          // defaultValue={election}
+                          step={1}
+                          onChange={(event, value) =>
+                            this.setState({
+                              election: value,
+                              electedExpenseInputMode: false
+                            })
+                          }
+                          // onChangeCommitted={(event, value) => this.setState({ election: value })}
+                          marks={electedExpenseSliderMarks}
+                          valueLabelDisplay='on'
+                          aria-label='Budget Slider'
+                          aria-labelledby='budget-slider'
+                          aria-valuetext={election + '%'}
+                          getAriaLabel={value => `${value}%`}
+                          getAriaValueText={value => `${value}%`}
+                        />
+                      </SliderTooltip>
+                    </div>
+
+                    {/* Annual Salary */}
+                    <div
+                      style={{
+                        // display: 'grid',
+                        // placeItems: 'center',
+                        // minWidth: 640,
+                        // maxWidth: 960,
+                        paddingLeft: 48,
+                        paddingRight: 48,
+                        marginBottom: 64
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginBottom: 36,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'flex-end'
+                        }}
+                      >
+                        <Typography variant='h5' gutterBottom>
+                          {`What's your annual salary?`}
+                        </Typography>
+                        <InputSpacer />
+                        {annualSalaryInputMode ? (
+                          <Fragment>
+                            <Typography variant='h5' gutterBottom>
+                              <span style={{ fontWeight: 'bold' }}>{currency.label}</span>
+                            </Typography>
+                            {/* TODO: implement tab to switch focus between text input fields */}
                             <TextField
                               autoFocus
-                              name='election'
-                              className='election'
+                              name='annualSalary'
+                              className='annualSalary'
                               required
-                              value={election || MIN_ELECTION}
+                              value={annualSalary || MIN_ANNUAL_SALARY}
                               onKeyDown={event => {
                                 event.persist();
                                 this.setState({
-                                  electedExpenseInputMode: event.keyCode !== 13
+                                  annualSalaryInputMode: event.keyCode !== 13
                                 });
                               }}
                               onChange={event => {
                                 event.persist();
                                 this.setState(prevState => ({
                                   ...prevState,
-                                  [event.target.name]: this.validateSliderExpense(
-                                    event.target.value || MIN_ELECTION
+                                  [event.target.name]: this.validateSalary(
+                                    event.target.value || MIN_ANNUAL_SALARY
                                   )
                                 }));
                               }}
                               onFocus={event => event.target.select()}
                               onBlur={() =>
                                 this.setState(prevState => ({
-                                  electedExpenseInputMode: false
+                                  annualSalaryInputMode: false
                                 }))
                               }
                               color='secondary'
                               margin='dense'
                               size='small'
                               type='number'
-                              placeholder={`${MIN_ELECTION}`}
+                              placeholder={`${MIN_ANNUAL_SALARY}`}
                             />
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            width: 180,
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            alignItems: 'center'
-                          }}
-                          onClick={() =>
-                            this.setState(prevState => ({
-                              electedExpenseInputMode: !prevState.electedExpenseInputMode,
-                              electedExpenseTooltipVisible: false
-                            }))
-                          }
-                        >
-                          <Typography variant='h5' gutterBottom>
-                            <InputTooltip
-                              open={electedExpenseTooltipVisible}
-                              // onOpen={handleTooltipOpen}
-                              // onClose={handleTooltipClose}
-                              title='Press to enter new value.'
-                              aria-label='Budget Slider'
-                              placement='right'
-                              disableFocusListener
-                              // disableHoverListener
-                              disableTouchListener
-                              arrow
-                            >
-                              <span style={{ color: '#e62958', fontWeight: 'bold' }}>
-                                {election}%
-                              </span>
-                            </InputTooltip>
-                          </Typography>
-                        </div>
-                      )}
-                    </div>
-                    <SliderTooltip
-                      // open={sliderTooltipVisible}
-                      // onOpen={handleTooltipOpen}
-                      // onClose={handleTooltipClose}
-                      title='Drag slider to adjust value.'
-                      aria-label='Budget Slider'
-                      placement='bottom'
-                      disableFocusListener
-                      // disableHoverListener
-                      disableTouchListener
-                      arrow
-                    >
-                      <Slider
-                        color='secondary'
-                        track={false}
-                        name='budget'
-                        min={MIN_ELECTION}
-                        max={Math.max(election, MAX_ELECTION)}
-                        // defaultValue={election}
-                        value={this.state.election || MIN_ELECTION} // TODO: load on auth
-                        valueLabelFormat={value => value + '%'}
-                        step={1}
-                        onChange={(event, value) =>
-                          this.setState({
-                            election: value,
-                            electedExpenseInputMode: false
-                          })
-                        }
-                        // onChangeCommitted={(event, value) => this.setState({ election: value })}
-                        marks={electedExpenseSliderMarks}
-                        valueLabelDisplay='on'
-                        aria-label='Budget Slider'
-                        aria-labelledby='budget-slider'
-                        aria-valuetext={election + '%'}
-                        getAriaLabel={value => `${value}%`}
-                        getAriaValueText={value => `${value}%`}
-                      />
-                    </SliderTooltip>
-                  </div>
-
-                  {/* Annual Salary */}
-                  <div
-                    style={{
-                      // display: 'grid',
-                      // placeItems: 'center',
-                      // minWidth: 640,
-                      // maxWidth: 960,
-                      paddingLeft: 48,
-                      paddingRight: 48,
-                      marginBottom: 64
-                    }}
-                  >
-                    <div
-                      style={{
-                        marginBottom: 36,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'flex-end'
-                      }}
-                    >
-                      <Typography variant='h5' gutterBottom>
-                        {`What's your annual salary?`}
-                      </Typography>
-                      <InputSpacer />
-                      {annualSalaryInputMode ? (
-                        <Fragment>
-                          <Typography variant='h5' gutterBottom>
-                            <span style={{ fontWeight: 'bold' }}>{currency.label}</span>
-                          </Typography>
-                          {/* TODO: implement tab to switch focus between text input fields */}
-                          <TextField
-                            autoFocus
-                            name='annualSalary'
-                            className='annualSalary'
-                            required
-                            value={annualSalary || MIN_ANNUAL_SALARY}
-                            onKeyDown={event => {
-                              event.persist();
-                              this.setState({
-                                annualSalaryInputMode: event.keyCode !== 13
-                              });
-                            }}
-                            onChange={event => {
-                              event.persist();
+                          </Fragment>
+                        ) : (
+                          <div
+                            onClick={() =>
                               this.setState(prevState => ({
-                                ...prevState,
-                                [event.target.name]: this.validateSalary(
-                                  event.target.value || MIN_ANNUAL_SALARY
-                                )
-                              }));
-                            }}
-                            onFocus={event => event.target.select()}
-                            onBlur={() =>
-                              this.setState(prevState => ({
-                                annualSalaryInputMode: false
+                                annualSalaryInputMode: !prevState.annualSalaryInputMode,
+                                annualSalaryTooltipVisible: false
                               }))
                             }
-                            color='secondary'
-                            margin='dense'
-                            size='small'
-                            type='number'
-                            placeholder={`${MIN_ANNUAL_SALARY}`}
-                          />
-                        </Fragment>
-                      ) : (
-                        <div
-                          onClick={() =>
-                            this.setState(prevState => ({
-                              annualSalaryInputMode: !prevState.annualSalaryInputMode,
-                              annualSalaryTooltipVisible: false
-                            }))
-                          }
-                        >
-                          <Typography variant='h5' gutterBottom>
-                            <InputTooltip
-                              open={annualSalaryTooltipVisible}
-                              // onOpen={handleTooltipOpen}
-                              // onClose={handleTooltipClose}
-                              title='Press to enter new value.'
-                              aria-label='Budget Slider'
-                              placement='right'
-                              disableFocusListener
-                              // disableHoverListener
-                              disableTouchListener
-                              arrow
-                            >
-                              {/* TODO: resolve decimal bug */}
-                              <span style={{ color: '#e62958', fontWeight: 'bold' }}>
-                                {this.usdFormat(annualSalary)}
-                              </span>
-                            </InputTooltip>
-                          </Typography>
-                        </div>
-                      )}
+                          >
+                            <Typography variant='h5' gutterBottom>
+                              <InputTooltip
+                                open={annualSalaryTooltipVisible}
+                                // onOpen={handleTooltipOpen}
+                                // onClose={handleTooltipClose}
+                                title='Press to enter new value.'
+                                aria-label='Budget Slider'
+                                placement='right'
+                                disableFocusListener
+                                // disableHoverListener
+                                disableTouchListener
+                                arrow
+                              >
+                                {/* TODO: resolve decimal bug */}
+                                <span style={{ color: '#e62958', fontWeight: 'bold' }}>
+                                  {this.usdFormat(annualSalary)}
+                                </span>
+                              </InputTooltip>
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Monthly Expenses */}
+                    <div
+                      style={{
+                        // display: 'grid',
+                        // placeItems: 'center',
+                        // minWidth: 640,
+                        // maxWidth: 960,
+                        paddingLeft: 48,
+                        paddingRight: 48,
+                        marginBottom: 64
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginBottom: 36,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'flex-end'
+                        }}
+                      >
+                        <Typography variant='h5' gutterBottom>
+                          {`Your total monthly expenses amount to `}
+                          <span style={{ fontWeight: 'bold' }}>{monthlyExpenses}.</span>
+                        </Typography>
+                      </div>
+                    </div>
+
+                    {/* Monthly Savings */}
+                    <div
+                      style={{
+                        // display: 'grid',
+                        // placeItems: 'center',
+                        // minWidth: 640,
+                        // maxWidth: 960,
+                        paddingLeft: 48,
+                        paddingRight: 48,
+                        marginBottom: 64
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginBottom: 36,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'flex-end'
+                        }}
+                      >
+                        <Typography variant='h5' gutterBottom>
+                          {`Your monthly savings amount to `}
+                          <span style={{ fontWeight: 'bold' }}>{monthlySavings}.</span>
+                        </Typography>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Monthly Expenses */}
+                  {/* Submit Budget */}
                   <div
                     style={{
-                      // display: 'grid',
-                      // placeItems: 'center',
+                      display: 'flex',
+                      justifyContent: 'space-around',
                       // minWidth: 640,
                       // maxWidth: 960,
                       paddingLeft: 48,
@@ -707,85 +913,31 @@ class Login extends Component {
                       marginBottom: 64
                     }}
                   >
-                    <div
-                      style={{
-                        marginBottom: 36,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'flex-end'
-                      }}
+                    <Button
+                      aria-label='Submit Budget Form'
+                      onClick={this.handleBudgetFormSubmit}
+                      disabled={budgetFormSubmitted}
+                      type='button'
+                      variant='contained'
+                      className={classes.button}
+                      size='large'
+                      // color='secondary'
+                      color='secondary'
+                      fullWidth
                     >
-                      <Typography variant='h5' gutterBottom>
-                        {`Your total monthly expenses amount to `}
-                        <span style={{ fontWeight: 'bold' }}>{monthlyExpenses}.</span>
-                      </Typography>
-                    </div>
+                      {budgetFormSubmitted ? 'In progress…' : 'Submit'}
+                    </Button>
                   </div>
-
-                  {/* Monthly Savings */}
-                  <div
-                    style={{
-                      // display: 'grid',
-                      // placeItems: 'center',
-                      // minWidth: 640,
-                      // maxWidth: 960,
-                      paddingLeft: 48,
-                      paddingRight: 48,
-                      marginBottom: 64
-                    }}
-                  >
-                    <div
-                      style={{
-                        marginBottom: 36,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'flex-end'
-                      }}
-                    >
-                      <Typography variant='h5' gutterBottom>
-                        {`Your monthly savings amount to `}
-                        <span style={{ fontWeight: 'bold' }}>{monthlySavings}.</span>
-                      </Typography>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Submit Budget */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    // minWidth: 640,
-                    // maxWidth: 960,
-                    paddingLeft: 48,
-                    paddingRight: 48,
-                    marginBottom: 64
-                  }}
-                >
-                  <Button
-                    aria-label='Submit Budget Form'
-                    onClick={this.handleBudgetFormSubmit}
-                    disabled={budgetFormSubmitted}
-                    type='button'
-                    variant='contained'
-                    className={classes.button}
-                    size='large'
-                    // color='secondary'
-                    color='secondary'
-                    fullWidth
-                  >
-                    {budgetFormSubmitted ? 'In progress…' : 'Submit'}
-                  </Button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <Fragment>
             <AppForm>
               <Fragment>
                 <Typography variant='h3' gutterBottom marked='center' align='center'>
-                  Sign In
+                  Welcome!
                 </Typography>
                 <Typography variant='body2' gutterBottom align='center'>
                   {'Not a member yet? '}
