@@ -35,6 +35,9 @@ class App extends Component {
 
   render() {
     console.log('src/App.js --> render');
+    // designed to protect from so-called XSRF (cross-site request forgery) attacks
+    // see: https://javascript.info/cookie#samesite
+    document.cookie = 'SameSite=None; Secure';
     return this.state.loading ? (
       <LinearProgress color='secondary' />
     ) : (
