@@ -7,8 +7,8 @@ import Paper from '../components/Paper';
 
 const styles = theme => ({
   root: {
-    display: 'grid',
-    placeItems: 'center'
+    // display: 'grid',
+    // placeItems: 'center',
     // height: 'calc(100vh - 70px)',
     // backgroundImage: 'url(' + require('../static/assets/images/curvy-lines.png') + ')',
     // backgroundRepeat: 'no-repeat',
