@@ -2,7 +2,7 @@ import withRoot from './lib/withRoot';
 import React, { Component } from 'react';
 import { Login, Signup, Home, Landing, Report, Slider } from './views';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
-// import { hot } from 'react-hot-loader/root';
+import { hot } from 'react-hot-loader/root';
 // import { connect } from 'react-redux';
 import { auth } from './services/firebase';
 import { PrivateRoute, PublicRoute, Routes } from './views/Routes';
@@ -56,4 +56,4 @@ class App extends Component {
 
 // export default hot(App);
 
-export default withRoot(App);
+export default hot(withRoot(App));
