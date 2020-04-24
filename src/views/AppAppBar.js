@@ -7,6 +7,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
 import AppBar from '../components/AppBar';
 import Toolbar, { styles as toolbarStyles } from '../components/Toolbar';
+import { sleep } from '../util';
 
 const styles = theme => ({
   title: {
@@ -55,15 +56,11 @@ function AppAppBar(props) {
   const [tooltipIsOpen, setTooltipIsOpen] = React.useState(true);
 
   const handleTooltipClose = (delay = 0) => {
-    setTimeout(() => {
-      setTooltipIsOpen(false);
-    }, delay);
+    sleep(delay).then(() => setTooltipIsOpen(false));
   };
 
   const handleTooltipOpen = (delay = 0) => {
-    setTimeout(() => {
-      setTooltipIsOpen(true);
-    }, delay);
+    sleep(delay).then(() => setTooltipIsOpen(true));
   };
 
   useEffect(() => {

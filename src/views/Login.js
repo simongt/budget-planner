@@ -43,6 +43,7 @@ import FormFeedback from '../components/form/FormFeedback';
 import { email, required } from '../components/form/validation';
 // import { connect } from 'react-redux';
 import { auth, signinWithGoogle } from '../services/firebase';
+import { sleep } from '../util';
 import 'react-toastify/dist/ReactToastify.css';
 import 'devextreme/dist/css/dx.common.css';
 import 'devextreme/dist/css/dx.light.css';
@@ -102,9 +103,6 @@ const InputSpacer = () => <span style={{ width: 8, height: 48 }}></span>;
 class Login extends Component {
   constructor(props) {
     super(props);
-
-    this.autoClearTooltips = null;
-
     this.state = {
       loading: true,
       emailLoginPressed: false,
@@ -198,13 +196,13 @@ class Login extends Component {
           },
           () => {
             if (!this.state.electedExpenseInputMode && !this.state.annualSalaryInputMode) {
-              this.autoClearTooltips = setTimeout(() => {
+              sleep(5000).then(() => {
                 this.setState({
                   electedExpenseTooltipVisible: false,
                   annualSalaryTooltipVisible: false,
                   sliderTooltipVisible: false
                 });
-              }, 5000);
+              });
             }
           }
         );
@@ -238,12 +236,7 @@ class Login extends Component {
     }
   }
 
-  componentWillUnmount = () => {
-    if (this.autoClearTooltips) {
-      clearTimeout(this.autoClearTooltips);
-      this.autoClearTooltips = null;
-    }
-  };
+  componentWillUnmount = () => {};
 
   validateForm = values => {
     const errors = required(['email', 'password'], values);
