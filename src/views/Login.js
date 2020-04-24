@@ -19,6 +19,19 @@ import {
 } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import PieChart, {
+  CommonSeriesSettings,
+  Legend,
+  Series,
+  Export,
+  Label,
+  Title,
+  Tooltip as PCTooltip,
+  Subtitle
+} from 'devextreme-react/pie-chart';
+// import DataGrid from 'devextreme-react/data-grid';
+// import ArrayStore from 'devextreme/data/array_store';
+// import DataSource from 'devextreme/data/data_source';
 import Typography from '../components/Typography';
 import AppAppBar from './AppAppBar';
 import AppForm from './AppForm';
@@ -31,6 +44,8 @@ import { email, required } from '../components/form/validation';
 // import { connect } from 'react-redux';
 import { auth, signinWithGoogle } from '../services/firebase';
 import 'react-toastify/dist/ReactToastify.css';
+import 'devextreme/dist/css/dx.common.css';
+import 'devextreme/dist/css/dx.light.css';
 
 // constants
 const MIN_ELECTION = 1;
@@ -112,6 +127,7 @@ class Login extends Component {
       annualSalaryTooltipVisible: true,
       monthlyExpenses: null,
       monthlySavings: null,
+      budgetData: [],
       budgetFormSubmitted: false,
       sliderTooltipVisible: true,
       currency: {
@@ -140,6 +156,20 @@ class Login extends Component {
         authenticated: this.props.authenticated,
         user: this.props.authenticated ? auth().currentUser : null,
         electedExpenseSliderMarks,
+        budgetData: [
+          {
+            label: 'Annual Salary',
+            amount: this.state.annualSalary
+          },
+          {
+            label: 'Monthly Expenses',
+            amount: (this.state.annualSalary / 12) * (this.state.election / 100)
+          },
+          {
+            label: 'Monthly Savings',
+            amount: (this.state.annualSalary / 12) * ((100 - this.state.election) / 100)
+          }
+        ],
         monthlyExpenses: this.getMonthlyExpenses(),
         monthlySavings: this.getMonthlySavings(),
         classes: makeStyles(theme => ({
@@ -162,17 +192,22 @@ class Login extends Component {
         }))
       },
       () => {
-        this.setState({ loading: false }, () => {
-          if (!this.state.electedExpenseInputMode && !this.state.annualSalaryInputMode) {
-            this.autoClearTooltips = setTimeout(() => {
-              this.setState({
-                electedExpenseTooltipVisible: false,
-                annualSalaryTooltipVisible: false,
-                sliderTooltipVisible: false
-              });
-            }, 5000);
+        this.setState(
+          {
+            loading: false
+          },
+          () => {
+            if (!this.state.electedExpenseInputMode && !this.state.annualSalaryInputMode) {
+              this.autoClearTooltips = setTimeout(() => {
+                this.setState({
+                  electedExpenseTooltipVisible: false,
+                  annualSalaryTooltipVisible: false,
+                  sliderTooltipVisible: false
+                });
+              }, 5000);
+            }
           }
-        });
+        );
       }
     );
   };
@@ -183,6 +218,20 @@ class Login extends Component {
       prevState.annualSalary !== this.state.annualSalary
     ) {
       this.setState({
+        budgetData: [
+          {
+            label: 'Annual Salary',
+            amount: this.state.annualSalary
+          },
+          {
+            label: 'Monthly Expenses',
+            amount: (this.state.annualSalary / 12) * (this.state.election / 100)
+          },
+          {
+            label: 'Monthly Savings',
+            amount: (this.state.annualSalary / 12) * ((100 - this.state.election) / 100)
+          }
+        ],
         monthlyExpenses: this.getMonthlyExpenses(),
         monthlySavings: this.getMonthlySavings()
       });
@@ -400,6 +449,10 @@ class Login extends Component {
     }
   };
 
+  customizePieChartTooltip = arg => {
+    return { text: `${arg.argumentText}<br>${arg.seriesName}: ${arg.valueText}` };
+  };
+
   render() {
     const {
       loading,
@@ -422,6 +475,7 @@ class Login extends Component {
       annualSalaryTooltipVisible,
       monthlyExpenses,
       monthlySavings,
+      budgetData,
       budgetFormSubmitted,
       sliderTooltipVisible
     } = this.state;
@@ -473,7 +527,31 @@ class Login extends Component {
                     justifyContent: 'center'
                   }}
                 >
-                  {/* TODO: add pie chart */}
+                  <PieChart
+                    id={'pie'}
+                    type={'doughnut'}
+                    innerRadius={0.2}
+                    palette={'Material'}
+                    // palette='Bright'
+                    dataSource={this.state.budgetData}
+                  >
+                    <Title text={'Analysis'}></Title>
+
+                    <CommonSeriesSettings>
+                      <Label visible={false} />
+                    </CommonSeriesSettings>
+                    <Series name={'Expense Report'} argumentField={'label'} valueField={'amount'} />
+                    {/* <Series name={'Expense-Savings'} argumentField={'label'} valueField={'amount'} /> */}
+
+                    <Export enabled={true} />
+                    <Legend visible={true} />
+
+                    <PCTooltip
+                      enabled={true}
+                      format={'currency'}
+                      customizeTooltip={this.customizePieChartTooltip}
+                    />
+                  </PieChart>
                   {/* Expense Report */}
                   <div
                     style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
