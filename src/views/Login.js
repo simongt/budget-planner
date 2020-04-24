@@ -29,9 +29,6 @@ import PieChart, {
   Tooltip as PCTooltip,
   Subtitle
 } from 'devextreme-react/pie-chart';
-// import DataGrid from 'devextreme-react/data-grid';
-// import ArrayStore from 'devextreme/data/array_store';
-// import DataSource from 'devextreme/data/data_source';
 import Typography from '../components/Typography';
 import AppAppBar from './AppAppBar';
 import AppForm from './AppForm';
@@ -138,72 +135,111 @@ class Login extends Component {
   componentDidMount = () => {
     console.log('Login --> componentDidMount', this.props);
     const electedExpenseSliderMarks = [];
-    let election = MAX_ELECTION;
-    while (election >= MIN_ELECTION) {
+    let electionMark = MAX_ELECTION;
+    while (electionMark >= MIN_ELECTION) {
       // TODO: better responsivity: show less/more marks on narrow/wide screens by adjusting % N
-      if (election % 5 === 0 || election === MIN_ELECTION || election === MAX_ELECTION) {
+      if (
+        electionMark % 5 === 0 ||
+        electionMark === MIN_ELECTION ||
+        electionMark === MAX_ELECTION
+      ) {
         electedExpenseSliderMarks.push({
-          value: election,
-          label: election + '%'
+          value: electionMark,
+          label: electionMark + '%'
         });
       }
-      election--;
+      electionMark--;
     }
+    // if neither election nor salary are found in local storage, proceed with defaults
     this.setState(
       {
         authenticated: this.props.authenticated,
-        user: this.props.authenticated ? auth().currentUser : null,
-        electedExpenseSliderMarks,
-        budgetData: [
-          {
-            label: 'Annual Salary',
-            amount: this.state.annualSalary
-          },
-          {
-            label: 'Monthly Expenses',
-            amount: (this.state.annualSalary / 12) * (this.state.election / 100)
-          },
-          {
-            label: 'Monthly Savings',
-            amount: (this.state.annualSalary / 12) * ((100 - this.state.election) / 100)
-          }
-        ],
-        monthlyExpenses: this.getMonthlyExpenses(),
-        monthlySavings: this.getMonthlySavings(),
-        classes: makeStyles(theme => ({
-          form: {
-            marginTop: theme.spacing(6)
-          },
-          button: {
-            marginTop: theme.spacing(3),
-            marginBottom: theme.spacing(2)
-          },
-          feedback: {
-            marginTop: theme.spacing(2)
-          },
-          slider: {
-            // width: 300
-          },
-          sliderMargin: {
-            height: theme.spacing(3)
-          }
-        }))
+        user: this.props.authenticated ? auth().currentUser : null
       },
       () => {
+        const storage = {
+          election: this.state.user
+            ? parseFloat(localStorage.getItem(`${this.state.user.uid}-election`) || '')
+            : null,
+          annualSalary: this.state.user
+            ? parseFloat(localStorage.getItem(`${this.state.user.uid}-salary`) || '')
+            : null,
+          monthlyExpenses: this.state.user
+            ? localStorage.getItem(`${this.state.user.uid}-expenses`) || ''
+            : null,
+          monthlySavings: this.state.user
+            ? localStorage.getItem(`${this.state.user.uid}-savings`) || ''
+            : null
+        };
         this.setState(
-          {
-            loading: false
-          },
+          prevState => ({
+            election: storage.election ? storage.election : prevState.election,
+            annualSalary: storage.annualSalary ? storage.annualSalary : prevState.annualSalary,
+            monthlyExpenses: storage.monthlyExpenses
+              ? storage.monthlyExpenses
+              : prevState.monthlyExpenses,
+            monthlySavings: storage.monthlySavings
+              ? storage.monthlySavings
+              : prevState.monthlySavings
+          }),
           () => {
-            if (!this.state.electedExpenseInputMode && !this.state.annualSalaryInputMode) {
-              sleep(5000).then(() => {
-                this.setState({
-                  electedExpenseTooltipVisible: false,
-                  annualSalaryTooltipVisible: false,
-                  sliderTooltipVisible: false
-                });
-              });
-            }
+            this.setState(
+              {
+                electedExpenseSliderMarks,
+                budgetData: [
+                  {
+                    label: 'Annual Salary',
+                    amount: this.state.annualSalary
+                  },
+                  {
+                    label: 'Monthly Expenses',
+                    amount: (this.state.annualSalary / 12) * (this.state.election / 100)
+                  },
+                  {
+                    label: 'Monthly Savings',
+                    amount: (this.state.annualSalary / 12) * ((100 - this.state.election) / 100)
+                  }
+                ],
+                monthlyExpenses: this.getMonthlyExpenses(),
+                monthlySavings: this.getMonthlySavings(),
+                classes: makeStyles(theme => ({
+                  form: {
+                    marginTop: theme.spacing(6)
+                  },
+                  button: {
+                    marginTop: theme.spacing(3),
+                    marginBottom: theme.spacing(2)
+                  },
+                  feedback: {
+                    marginTop: theme.spacing(2)
+                  },
+                  slider: {
+                    // width: 300
+                  },
+                  sliderMargin: {
+                    height: theme.spacing(3)
+                  }
+                }))
+              },
+              () => {
+                this.setState(
+                  {
+                    loading: false
+                  },
+                  () => {
+                    if (!this.state.electedExpenseInputMode && !this.state.annualSalaryInputMode) {
+                      sleep(5000).then(() => {
+                        this.setState({
+                          electedExpenseTooltipVisible: false,
+                          annualSalaryTooltipVisible: false,
+                          sliderTooltipVisible: false
+                        });
+                      });
+                    }
+                  }
+                );
+              }
+            );
           }
         );
       }
@@ -215,28 +251,48 @@ class Login extends Component {
       prevState.election !== this.state.election ||
       prevState.annualSalary !== this.state.annualSalary
     ) {
-      this.setState({
-        budgetData: [
-          {
-            label: 'Annual Salary',
-            amount: this.state.annualSalary
-          },
-          {
-            label: 'Monthly Expenses',
-            amount: (this.state.annualSalary / 12) * (this.state.election / 100)
-          },
-          {
-            label: 'Monthly Savings',
-            amount: (this.state.annualSalary / 12) * ((100 - this.state.election) / 100)
+      this.setState(
+        {
+          budgetData: [
+            {
+              label: 'Annual Salary',
+              amount: this.state.annualSalary
+            },
+            {
+              label: 'Monthly Expenses',
+              amount: (this.state.annualSalary / 12) * (this.state.election / 100)
+            },
+            {
+              label: 'Monthly Savings',
+              amount: (this.state.annualSalary / 12) * ((100 - this.state.election) / 100)
+            }
+          ],
+          monthlyExpenses: this.getMonthlyExpenses(),
+          monthlySavings: this.getMonthlySavings()
+        },
+        () => {
+          try {
+            localStorage.setItem(`${this.state.user.uid}-election`, `${this.state.election}`);
+            localStorage.setItem(`${this.state.user.uid}-salary`, `${this.state.annualSalary}`);
+            localStorage.setItem(
+              `${this.state.user.uid}-expenses`,
+              `${this.state.monthlyExpenses}`
+            );
+            localStorage.setItem(`${this.state.user.uid}-savings`, `${this.state.monthlySavings}`);
+          } catch (error) {
+            console.warn('Failed to save data in local storage.', error);
           }
-        ],
-        monthlyExpenses: this.getMonthlyExpenses(),
-        monthlySavings: this.getMonthlySavings()
-      });
+        }
+      );
     }
   }
 
   componentWillUnmount = () => {};
+
+  updateStorage = (key, value) => {
+    this.setState({ [key]: value });
+    localStorage.setItem(key, value);
+  };
 
   validateForm = values => {
     const errors = required(['email', 'password'], values);
@@ -1025,15 +1081,11 @@ class Login extends Component {
                   Welcome!
                 </Typography>
                 <Typography variant='body2' gutterBottom align='center'>
-                  {'Not a member yet? '}
-                  <MuiLink href='/sign-up' align='center' underline='always'>
-                    {'Sign up here'}
+                  <MuiLink align='center' underline='always'>
+                    {'Sign up'}
                   </MuiLink>
-                </Typography>
-                <Typography variant='body2' align='center'>
-                  <MuiLink underline='always' href='/forgot-password'>
-                    Forgot password?
-                  </MuiLink>
+                  <span style={{}} />
+                  <MuiLink underline='always'>Forgot password?</MuiLink>
                 </Typography>
               </Fragment>
               <Form
