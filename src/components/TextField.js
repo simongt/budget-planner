@@ -20,6 +20,7 @@ const styles = theme => ({
     }
   },
   inputBorder: {
+    borderRadius: theme.spacing(0.75),
     border: '1px solid #e9ddd0',
     '&:focus': {
       borderColor: theme.palette.secondary.main
