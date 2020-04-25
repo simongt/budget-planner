@@ -2,7 +2,9 @@ import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { toast } from 'react-toastify';
+import Img from 'react-cool-img';
 import { withStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
 import AppBar from '../components/AppBar';
@@ -39,6 +41,14 @@ const styles = theme => ({
   }
 });
 
+const PiggyBankLogo = ({ width, height }) => (
+  <Img
+    style={{ backgroundColor: 'transparent', width, height }}
+    src={require('../static/assets/images/piggy-bank--transparent--250px.png')}
+    alt='Piggy Bank'
+  />
+);
+
 const NavbarTooltip = withStyles(theme => ({
   tooltip: {
     backgroundColor: 'rgba(230,41,88, 0.75)',
@@ -71,7 +81,11 @@ function AppAppBar(props) {
     <div>
       <AppBar position='fixed'>
         <Toolbar className={classes.toolbar}>
-          <div className={classes.left} />
+          {isWidthUp('sm', props.width) && (
+            <div className={classes.left}>
+              <PiggyBankLogo width={50} height={50} />
+            </div>
+          )}
           <Link
             variant='h6'
             underline='none'
@@ -154,4 +168,5 @@ AppAppBar.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(AppAppBar);
+// export default withStyles(styles)(AppAppBar);
+export default withWidth()(withStyles(styles)(AppAppBar));
