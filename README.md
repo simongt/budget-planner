@@ -39,16 +39,16 @@ npm start
 open http://localhost:8080/
 ```
 
-### Deploy to local server (dev test environment).
+### Build app using dev testing environment and launch from local server.
 
 ```
-npm run build-dev && firebase serve
+npm run serve
 open http://localhost:5000/
 ```
 
-### Deploy to production.
+### Build and deploy app to Firebase production environemnt.
 
 ```
-npm run build-prod && firebase deploy
+npm run deploy
 open https://react-budget-planner.web.app/
 ```

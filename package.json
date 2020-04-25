@@ -10,7 +10,9 @@
     "start": "webpack-dev-server --hot --mode development",
     "clean": "rm dist/bundle.js",
     "build-dev": "webpack -d --mode development",
+    "serve": "rm dist/bundle.js && webpack -d --mode development && firebase serve",
     "build-prod": "webpack -p --mode production",
+    "deploy": "rm dist/bundle.js && webpack -p --mode production && firebase deploy && git status",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
