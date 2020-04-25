@@ -1080,12 +1080,8 @@ class Login extends Component {
                 <Typography variant='h3' gutterBottom marked='center' align='center'>
                   Welcome!
                 </Typography>
-                <Typography variant='body2' gutterBottom align='center'>
-                  <MuiLink align='center' underline='always'>
-                    {'Sign up'}
-                  </MuiLink>
-                  <span style={{}} />
-                  <MuiLink underline='always'>Forgot password?</MuiLink>
+                <Typography variant='body2' align='center'>
+                  Please sign in to continue.
                 </Typography>
               </Fragment>
               <Form
@@ -1163,6 +1159,24 @@ class Login extends Component {
                   </form>
                 )}
               </Form>
+              <div style={{ marginTop: 16, marginBottom: 24 }}>
+                <Typography variant='body2' align='center'>
+                  <MuiLink align='center' underline='always'>
+                    {'Sign up'}
+                  </MuiLink>
+                  <span
+                    style={{
+                      backgroundColor: '#69696a',
+                      padding: 0.5,
+                      paddingTop: 4,
+                      paddingBottom: 4,
+                      marginLeft: 24,
+                      marginRight: 24
+                    }}
+                  />
+                  <MuiLink underline='always'>Forgot password?</MuiLink>
+                </Typography>
+              </div>
               <Fragment>
                 <Typography variant='h3' gutterBottom align='center'></Typography>
                 <Button
