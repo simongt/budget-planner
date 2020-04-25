@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Container from '@material-ui/core/Container';
-import Box from '@material-ui/core/Box';
+import { Grid, Box, Container as MuiContainer } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '../components/Paper';
 
 const styles = theme => ({
   root: {
+    // backgroundColor: theme.palette.primary.main
     // display: 'grid',
     // placeItems: 'center',
     // height: 'calc(100vh - 70px)',
@@ -17,30 +17,31 @@ const styles = theme => ({
     // backgroundAttachment: 'fixed'
   },
   paper: {
-    padding: theme.spacing(4, 3),
+    borderRadius: theme.spacing(1),
+    padding: theme.spacing(3, 3),
     [theme.breakpoints.up('md')]: {
-      padding: theme.spacing(8, 6)
+      padding: theme.spacing(6, 6)
     }
   }
 });
 
-function AppForm(props) {
+function Container(props) {
   const { children, classes } = props;
 
   return (
     <div className={classes.root}>
-      <Container maxWidth='sm'>
-        <Box mt={7} mb={12}>
+      <MuiContainer maxWidth='sm'>
+        <Box mt={4} mb={4}>
           <Paper className={classes.paper}>{children}</Paper>
         </Box>
-      </Container>
+      </MuiContainer>
     </div>
   );
 }
 
-AppForm.propTypes = {
+Container.propTypes = {
   children: PropTypes.node.isRequired,
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(AppForm);
+export default withStyles(styles)(Container);
