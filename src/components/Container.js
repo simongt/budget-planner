@@ -2,20 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Box, Container as MuiContainer } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '../components/Paper';
+import Paper from './Paper';
 
 const styles = theme => ({
-  root: {
-    // backgroundColor: theme.palette.primary.main
-    // display: 'grid',
-    // placeItems: 'center',
-    // height: 'calc(100vh - 70px)',
-    // backgroundImage: 'url(' + require('../static/assets/images/curvy-lines.png') + ')',
-    // backgroundRepeat: 'no-repeat',
-    // backgroundPosition: 'center center',
-    // backgroundSize: 'cover',
-    // backgroundAttachment: 'fixed'
-  },
+  root: {},
   paper: {
     borderRadius: theme.spacing(1),
     padding: theme.spacing(3, 3),

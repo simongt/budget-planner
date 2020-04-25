@@ -1,13 +1,13 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { toast } from 'react-toastify';
-import Img from 'react-cool-img';
-import { withWidth, withStyles, Tooltip, Link as MuiLink } from '@material-ui/core';
+import { withWidth, withStyles, Link as MuiLink } from '@material-ui/core';
 import { isWidthUp } from '@material-ui/core/withWidth';
-import AppBar from '../components/AppBar';
-import Toolbar, { styles as toolbarStyles } from '../components/Toolbar';
+import AppBar from './AppBar';
+import Toolbar, { styles as toolbarStyles } from './Toolbar';
 import { sleep } from '../util';
+import { currencies } from '../constants';
+import { NavbarTooltip, PiggyBankLogo } from './';
 
 const styles = theme => ({
   title: {
@@ -39,27 +39,7 @@ const styles = theme => ({
   }
 });
 
-const PiggyBankLogo = ({ width, height }) => (
-  <Img
-    style={{ backgroundColor: 'transparent', width, height }}
-    src={require('../static/assets/images/piggy-bank--transparent--250px.png')}
-    alt='Piggy Bank'
-  />
-);
-
-const NavbarTooltip = withStyles(theme => ({
-  tooltip: {
-    backgroundColor: 'rgba(230,41,88, 0.75)',
-    color: 'rgba(255, 255, 255, 0.95)',
-    boxShadow: theme.shadows[1],
-    fontSize: 12
-  },
-  arrow: {
-    color: 'rgba(230,41,88, 0.75)'
-  }
-}))(Tooltip);
-
-function AppAppBar(props) {
+function TopNavBar(props) {
   const { classes, authenticated, oauthLogin, logout } = props;
   const [tooltipIsOpen, setTooltipIsOpen] = React.useState(true);
 
@@ -162,9 +142,9 @@ function AppAppBar(props) {
   );
 }
 
-AppAppBar.propTypes = {
+TopNavBar.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-// export default withStyles(styles)(AppAppBar);
-export default withWidth()(withStyles(styles)(AppAppBar));
+// export default withStyles(styles)(TopNavBar);
+export default withWidth()(withStyles(styles)(TopNavBar));

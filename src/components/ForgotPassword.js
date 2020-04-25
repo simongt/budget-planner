@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // import { connect } from 'react-redux';
 
-class Report extends Component {
+class ForgotPassword extends Component {
   constructor(props) {
     super(props);
 
@@ -9,7 +9,7 @@ class Report extends Component {
   }
 
   render() {
-    return <div>Report</div>;
+    return <div>ForgotPassword</div>;
   }
 }
 
@@ -17,6 +17,6 @@ class Report extends Component {
 
 // const mapDispatchToProps = {};
 
-// export default connect(mapStateToProps, mapDispatchToProps)(Report);
+// export default connect(mapStateToProps, mapDispatchToProps)(ForgotPassword);
 
-export default Report;
+export default ForgotPassword;
