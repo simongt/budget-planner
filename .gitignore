@@ -55,3 +55,4 @@ Thumbs.db
 dist
 dist/*
 !dist/index.html
+*.psd
