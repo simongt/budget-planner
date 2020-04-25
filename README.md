@@ -1,10 +1,10 @@
 <h1 align="center">
-    <img alt="Piggy Bank" src="src/static/assets/images/piggy-bank--transparent--250px.png" width="200px" />
+    <img alt="Piggy Bank" src="src/static/assets/images/piggy-bank-on-orange-waves.jpg" width="600px" />
 </h1>
 
-<h2 align="center">
+<h3 align="center">
   Budget Planner
-</h2>
+</h3>
 
 <p align="center">A simple budgeting app that tells potential savings based on user data.</p>
 
