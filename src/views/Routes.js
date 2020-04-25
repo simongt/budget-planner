@@ -36,7 +36,7 @@ function Routes({ authenticated }) {
           exact
           path='/'
           component={() => {
-            return <Login authenticated={authenticated} />;
+            return <Home authenticated={authenticated} />;
           }}
         ></Route>
         {/* <PrivateRoute
