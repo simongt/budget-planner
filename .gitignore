@@ -56,3 +56,5 @@ dist
 dist/*
 !dist/index.html
 *.psd
+NOTES.md
+BACKLOG.md
