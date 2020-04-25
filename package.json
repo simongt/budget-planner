@@ -52,6 +52,7 @@
     "markdown-to-jsx": "^6.11.1",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
+    "react-cool-img": "^1.1.2",
     "react-dom": "^16.13.1",
     "react-final-form": "^6.4.0",
     "react-hot-loader": "^4.12.20",
@@ -62,6 +63,7 @@
     "redux": "^4.0.5",
     "redux-firestore": "^0.13.0",
     "typeface-roboto": "0.0.75",
+    "unused-webpack-plugin": "^2.4.0",
     "validator": "^13.0.0"
   }
 }

@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const UnusedWebpackPlugin = require('unused-webpack-plugin');
 
 const config = {
   entry: ['react-hot-loader/patch', './src/index.js'],
@@ -94,7 +95,15 @@ const config = {
       filename: 'index.html',
       template: 'src/static/index.html'
     }),
-    new MiniCssExtractPlugin()
+    new MiniCssExtractPlugin(),
+    new UnusedWebpackPlugin({
+      // Source directories
+      directories: [path.join(__dirname, 'src')],
+      // Exclude patterns
+      exclude: ['*.test.js'],
+      // Root directory (optional)
+      root: __dirname
+    })
   ],
   node: {
     fs: 'empty',

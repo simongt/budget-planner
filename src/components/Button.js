@@ -15,10 +15,12 @@ export default withStyles(theme => ({
   },
   sizeSmall: {
     padding: theme.spacing(1, 3),
-    fontSize: theme.typography.pxToRem(13)
+    fontSize: theme.typography.pxToRem(13),
+    borderRadius: theme.spacing(0.75)
   },
   sizeLarge: {
     padding: theme.spacing(2, 5),
-    fontSize: theme.typography.pxToRem(16)
+    fontSize: theme.typography.pxToRem(16),
+    borderRadius: theme.spacing(0.75)
   }
 }))(Button);

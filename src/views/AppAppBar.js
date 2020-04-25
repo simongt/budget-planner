@@ -2,11 +2,12 @@ import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { toast } from 'react-toastify';
-import { withStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
-import Link from '@material-ui/core/Link';
+import Img from 'react-cool-img';
+import { withWidth, withStyles, Tooltip, Link as MuiLink } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
 import AppBar from '../components/AppBar';
 import Toolbar, { styles as toolbarStyles } from '../components/Toolbar';
+import { sleep } from '../util';
 
 const styles = theme => ({
   title: {
@@ -38,6 +39,14 @@ const styles = theme => ({
   }
 });
 
+const PiggyBankLogo = ({ width, height }) => (
+  <Img
+    style={{ backgroundColor: 'transparent', width, height }}
+    src={require('../static/assets/images/piggy-bank--transparent--250px.png')}
+    alt='Piggy Bank'
+  />
+);
+
 const NavbarTooltip = withStyles(theme => ({
   tooltip: {
     backgroundColor: 'rgba(230,41,88, 0.75)',
@@ -55,15 +64,11 @@ function AppAppBar(props) {
   const [tooltipIsOpen, setTooltipIsOpen] = React.useState(true);
 
   const handleTooltipClose = (delay = 0) => {
-    setTimeout(() => {
-      setTooltipIsOpen(false);
-    }, delay);
+    sleep(delay).then(() => setTooltipIsOpen(false));
   };
 
   const handleTooltipOpen = (delay = 0) => {
-    setTimeout(() => {
-      setTooltipIsOpen(true);
-    }, delay);
+    sleep(delay).then(() => setTooltipIsOpen(true));
   };
 
   useEffect(() => {
@@ -74,8 +79,12 @@ function AppAppBar(props) {
     <div>
       <AppBar position='fixed'>
         <Toolbar className={classes.toolbar}>
-          <div className={classes.left} />
-          <Link
+          {isWidthUp('sm', props.width) && (
+            <div className={classes.left}>
+              <PiggyBankLogo width={50} height={50} />
+            </div>
+          )}
+          <MuiLink
             variant='h6'
             underline='none'
             color='inherit'
@@ -83,7 +92,7 @@ function AppAppBar(props) {
             // href='/'
           >
             {'Budget Planner'}
-          </Link>
+          </MuiLink>
           <div className={classes.right}>
             {authenticated ? (
               <Fragment>
@@ -96,7 +105,7 @@ function AppAppBar(props) {
                   disableTouchListener
                   arrow
                 >
-                  <Link
+                  <MuiLink
                     color='inherit'
                     variant='h6'
                     underline='none'
@@ -104,7 +113,7 @@ function AppAppBar(props) {
                     onClick={logout}
                   >
                     {'Log Out'}
-                  </Link>
+                  </MuiLink>
                 </NavbarTooltip>
               </Fragment>
             ) : (
@@ -121,7 +130,7 @@ function AppAppBar(props) {
                   disableTouchListener
                   arrow
                 >
-                  <Link
+                  <MuiLink
                     aria-label='Sign in with Google'
                     onClick={oauthLogin}
                     color='inherit'
@@ -130,9 +139,9 @@ function AppAppBar(props) {
                     className={classes.rightLink}
                   >
                     {'Sign In'}
-                  </Link>
+                  </MuiLink>
                 </NavbarTooltip>
-                <Link
+                <MuiLink
                   aria-label='Sign up with email'
                   variant='h6'
                   underline='none'
@@ -142,7 +151,7 @@ function AppAppBar(props) {
                   }}
                 >
                   {'Sign Up'}
-                </Link>
+                </MuiLink>
               </Fragment>
             )}
           </div>
@@ -157,4 +166,5 @@ AppAppBar.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(AppAppBar);
+// export default withStyles(styles)(AppAppBar);
+export default withWidth()(withStyles(styles)(AppAppBar));
