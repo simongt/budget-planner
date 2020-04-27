@@ -111,22 +111,24 @@ class Home extends Component {
     super(props);
     this.state = {
       loading: true,
-      emailLoginPressed: false,
-      oauthLoginPressed: false,
-      logoutPressed: false,
-      user: null,
       authenticated: false,
+      user: null,
       error: null,
       email: '',
       password: '',
       showPassword: false,
-      classes: null,
-      sent: false,
+      emailLoginClicked: false,
+      oauthLoginClicked: false,
+      logoutClicked: false,
+      signupClicked: false,
+      resetPasswordClicked: false,
+      muiClasses: null,
+      formSent: false,
       election: 15, // TODO: animate from min value
       electedExpenseSliderMarks: [],
       electedExpenseInputMode: false,
       electedExpenseTooltipVisible: true,
-      annualSalary: 100000, // TODO: animate from min value
+      annualSalary: 75000, // TODO: animate from min value
       annualSalaryInputMode: false,
       annualSalaryTooltipVisible: true,
       monthlyExpenses: null,
@@ -211,7 +213,7 @@ class Home extends Component {
                 ],
                 monthlyExpenses: this.getMonthlyExpenses(),
                 monthlySavings: this.getMonthlySavings(),
-                classes: makeStyles(theme => ({
+                muiClasses: makeStyles(theme => ({
                   form: {
                     marginTop: theme.spacing(6)
                   },
@@ -314,16 +316,45 @@ class Home extends Component {
     return errors;
   };
 
-  handleLoginPress = values => {
-    console.log('Home --> handleLoginPress', values);
+  handleSignup = values => {
+    console.log('Home --> handleSignup', values);
     event.preventDefault();
     this.setState(
       {
         error: '',
         email: values.email,
         password: values.password,
-        emailLoginPressed: true,
-        sent: true
+        emailLoginClicked: true,
+        formSent: true
+      },
+      () => {
+        auth()
+          .createUserWithEmailAndPassword(this.state.email, this.state.password)
+          .then(result => {
+            console.log(result);
+            toast.success('👍 Email sign-up successful.');
+            this.setState({ user: auth().currentUser, emailLoginClicked: false, formSent: false });
+          })
+          .catch(error => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            toast.error('🧐' + error.message);
+            this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+          });
+      }
+    );
+  };
+
+  handleLogin = values => {
+    console.log('Home --> handleLogin', values);
+    event.preventDefault();
+    this.setState(
+      {
+        error: '',
+        email: values.email,
+        password: values.password,
+        emailLoginClicked: true,
+        formSent: true
       },
       () => {
         auth()
@@ -331,13 +362,43 @@ class Home extends Component {
           .then(result => {
             console.log(result);
             toast.success('👍 Email sign-in successful.');
-            this.setState({ user: auth().currentUser, emailLoginPressed: false, sent: false });
+            this.setState({ user: auth().currentUser, emailLoginClicked: false, formSent: false });
           })
           .catch(error => {
             const errorCode = error.code;
             const errorMessage = error.message;
             toast.error('🧐' + error.message);
-            this.setState({ error: error.message, emailLoginPressed: false, sent: false });
+            this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+          });
+      }
+    );
+  };
+
+  handleResetPassword = values => {
+    console.log('Home --> handleResetPassword', values);
+    event.preventDefault();
+    this.setState(
+      {
+        error: '',
+        email: values.email,
+        formSent: true
+      },
+      () => {
+        auth()
+          .sendPasswordResetEmail(this.state.email)
+          .then(result => {
+            console.log(result);
+            toast.success('👍 Sent password reset email successfully.');
+            this.setState({
+              resetPasswordClicked: false,
+              formSent: false
+            });
+          })
+          .catch(error => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            toast.error('🧐' + error.message);
+            this.setState({ error: error.message, formSent: false });
           });
       }
     );
@@ -346,21 +407,19 @@ class Home extends Component {
   handleLogoutPress = () => {
     console.log('Home --> handleLogoutPress');
     event.preventDefault();
-    this.setState({ error: '', logoutPressed: true }, () => {
+    this.setState({ error: '', logoutClicked: true }, () => {
       auth()
         .signOut()
         .then(() => {
           toast.success('👍 Sign-out successful.');
           this.setState({
             user: null,
-            logoutPressed: false,
-            user: null,
             authenticated: false,
             email: '',
             password: '',
             showPassword: false,
-            // classes: null,
-            sent: false,
+            // muiClasses: null,
+            formSent: false,
             sliderTooltipVisible: false,
             electedExpenseInputMode: false,
             electedExpenseTooltipVisible: false,
@@ -373,8 +432,55 @@ class Home extends Component {
           const errorCode = error.code;
           const errorMessage = error.message;
           toast.error('🧐' + error.message);
-          this.setState({ error: error.message, logoutPressed: false });
+          this.setState({ error: error.message, logoutClicked: false });
         });
+    });
+  };
+
+  handleOauthLogin = async () => {
+    console.log('Home --> handleOauthLogin');
+    event.preventDefault();
+    this.setState({ error: '', oauthLoginClicked: true }, () => {
+      // Creates the provider object
+      const provider = new auth.GoogleAuthProvider();
+      // Add additional scopes to the provider
+      provider.addScope('profile');
+      provider.addScope('email');
+      // Sign in with popup
+      auth()
+        .signInWithPopup(provider)
+        .then(
+          result => {
+            const epoch = new Date().toISOString();
+            console.log('Home --> handleOauthLogin --> epoch:', epoch);
+            const user = result.user; // The firebase.User instance
+            console.log('Home --> handleOauthLogin --> firebase.User:', user);
+
+            // The Oauth firebase.auth.AuthCredential containing the Oauth access token
+            const credential = result.credential;
+            const token = result.credential.accessToken;
+            console.log('Home --> handleOauthLogin --> firebase.auth.AuthCredential:', credential);
+            this.setState(
+              { buttonPressed: false, oauthLoginClicked: false, user: auth().currentUser },
+              () => {
+                toast.success('👍 Google sign-in successful.');
+              }
+            );
+          },
+          error => {
+            // If account-exists-with-different-credential, fetch the providers linked to that email
+            const email = error.email; // provider's account email
+            const credential = error.credential; // provider's credential
+            if (error.code === 'auth/account-exists-with-different-credential') {
+              auth.fetchSignInMethodsForEmail(email).then(providers => {
+                console.log('Home --> handleOauthLogin --> providers: ', providers);
+              });
+            }
+            this.setState({ error: error.message, oauthLoginClicked: false }, () => {
+              toast.error('🧐' + this.state.error);
+            });
+          }
+        );
     });
   };
 
@@ -387,56 +493,6 @@ class Home extends Component {
       // if user changes any single attribute, it will mutate that corresponding attribute in state
       [event.target.name]: event.target.value
     }));
-  };
-
-  handleOauthLoginPress = async () => {
-    console.log('Home --> handleOauthLoginPress');
-    event.preventDefault();
-    this.setState({ error: '', oauthLoginPressed: true }, () => {
-      // Creates the provider object
-      const provider = new auth.GoogleAuthProvider();
-      // Add additional scopes to the provider
-      provider.addScope('profile');
-      provider.addScope('email');
-      // Sign in with popup
-      auth()
-        .signInWithPopup(provider)
-        .then(
-          result => {
-            const epoch = new Date().toISOString();
-            console.log('Home --> handleOauthLoginPress --> epoch:', epoch);
-            const user = result.user; // The firebase.User instance
-            console.log('Home --> handleOauthLoginPress --> firebase.User:', user);
-
-            // The Facebook firebase.auth.AuthCredential containing the Facebook access token
-            const credential = result.credential;
-            const token = result.credential.accessToken;
-            console.log(
-              'Home --> handleOauthLoginPress --> firebase.auth.AuthCredential:',
-              credential
-            );
-            this.setState(
-              { buttonPressed: false, oauthLoginPressed: false, user: auth().currentUser },
-              () => {
-                toast.success('👍 Google sign-in successful.');
-              }
-            );
-          },
-          error => {
-            // If account-exists-with-different-credential, fetch the providers linked to that email
-            const email = error.email; // provider's account email
-            const credential = error.credential; // provider's credential
-            if (error.code === 'auth/account-exists-with-different-credential') {
-              auth.fetchSignInMethodsForEmail(email).then(providers => {
-                console.log('Home --> handleOauthLoginPress --> providers: ', providers);
-              });
-            }
-            this.setState({ error: error.message, oauthLoginPressed: false }, () => {
-              toast.error('🧐' + this.state.error);
-            });
-          }
-        );
-    });
   };
 
   handleBudgetFormSubmit = event => {
@@ -505,7 +561,7 @@ class Home extends Component {
     }
   };
 
-  validateSalary = (value = MIN_ANNUAL_SALARY) => {
+  validateAnnualSalary = (value = MIN_ANNUAL_SALARY) => {
     if (value > MAX_ANNUAL_SALARY) {
       toast.error(
         `💸 The maximum salary allowed is ${this.abbreviateUsdFormat(MAX_ANNUAL_SALARY)}.`
@@ -534,9 +590,9 @@ class Home extends Component {
       email,
       password,
       showPassword,
-      classes,
-      sent,
-      oauthLoginPressed,
+      muiClasses,
+      formSent,
+      oauthLoginClicked,
       currency,
       electedExpenseSliderMarks,
       election,
@@ -549,7 +605,9 @@ class Home extends Component {
       monthlySavings,
       budgetData,
       budgetFormSubmitted,
-      sliderTooltipVisible
+      sliderTooltipVisible,
+      signupClicked,
+      resetPasswordClicked
     } = this.state;
     return loading ? (
       <LinearProgress color='secondary' />
@@ -558,8 +616,9 @@ class Home extends Component {
         {/* TODO: add left section when logged in for choosing currency */}
         <AppAppBar
           authenticated={authenticated}
-          oauthLogin={this.handleOauthLoginPress}
-          logout={this.handleLogoutPress}
+          signup={() => this.setState({ signupClicked: true, resetPasswordClicked: false })}
+          login={() => this.setState({ signupClicked: false, resetPasswordClicked: false })}
+          handleLogoutPress={this.handleLogoutPress}
         />
         {authenticated ? (
           <Fragment>
@@ -719,7 +778,7 @@ class Home extends Component {
                       disabled={!budgetFormSubmitted}
                       type='button'
                       variant='contained'
-                      className={classes.button}
+                      className={muiClasses.button}
                       size='large'
                       // color='secondary'
                       color='primary'
@@ -940,7 +999,7 @@ class Home extends Component {
                                 event.persist();
                                 this.setState(prevState => ({
                                   ...prevState,
-                                  [event.target.name]: this.validateSalary(
+                                  [event.target.name]: this.validateAnnualSalary(
                                     event.target.value || MIN_ANNUAL_SALARY
                                   )
                                 }));
@@ -1064,7 +1123,7 @@ class Home extends Component {
                       disabled={budgetFormSubmitted}
                       type='button'
                       variant='contained'
-                      className={classes.button}
+                      className={muiClasses.button}
                       size='large'
                       // color='secondary'
                       color='secondary'
@@ -1078,138 +1137,383 @@ class Home extends Component {
             )}
           </Fragment>
         ) : (
-          <Container>
-            <div
-              style={{
-                display: 'flex',
-                flexFlow: 'column nowrap',
-                justifyContent: 'space-evenly',
-                alignItems: 'center',
-                alignContent: 'center'
-              }}
-            >
-              <PiggyBankLogo width={250} height={250} />
-              <Typography variant='h3' gutterBottom marked='center' align='center'>
-                Welcome!
-              </Typography>
-              <Typography variant='body2' align='center'>
-                Please sign in to continue.
-              </Typography>
-            </div>
+          <>
+            {signupClicked && (
+              <Container>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexFlow: 'column nowrap',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                    alignContent: 'center'
+                  }}
+                >
+                  <PiggyBankLogo width={250} height={250} />
+                  <Typography variant='h3' gutterBottom marked='center' align='center'>
+                    Welcome!
+                  </Typography>
+                  <Typography variant='body2' align='center'>
+                    Please sign up to continue.
+                  </Typography>
+                </div>
 
-            <Form
-              onSubmit={this.handleLoginPress}
-              subscription={{ submitting: true }}
-              validate={this.validateForm}
-              onChange={this.handleFormChange}
-            >
-              {({ handleSubmit, submitting, onChange }) => (
-                <form onSubmit={handleSubmit} className={classes.form} noValidate>
-                  <Field
-                    autoComplete='email'
-                    autoFocus
-                    component={RFTextField}
-                    disabled={submitting || sent}
-                    fullWidth
-                    label='Email'
-                    margin='normal'
-                    name='email'
-                    required
-                    size='large'
-                  />
-                  <Field
-                    fullWidth
-                    size='large'
-                    component={RFTextField}
-                    disabled={submitting || sent}
-                    required
-                    name='password'
-                    autoComplete='current-password'
-                    label='Password'
-                    type={showPassword ? 'text' : 'password'}
-                    margin='normal'
-                    InputProps={{
-                      endAdornment: (
-                        <div style={{ position: 'absolute', right: 24 }}>
-                          <InputAdornment position='end'>
-                            <IconButton
-                              aria-label='toggle password visibility'
-                              onClick={event =>
-                                this.setState(prevState => ({
-                                  showPassword: !prevState.showPassword
-                                }))
-                              }
-                              onMouseDown={event => event.preventDefault()}
-                              edge='end'
-                            >
-                              {showPassword ? <Visibility /> : <VisibilityOff />}
-                            </IconButton>
-                          </InputAdornment>
-                        </div>
-                      )
-                    }}
-                  />
-                  {/* High Performance with Subscriptions */}
-                  {/* https://final-form.org/docs/react-final-form/examples/subscriptions */}
-                  <FormSpy subscription={{ submitError: true }}>
-                    {({ submitError }) =>
-                      submitError ? (
-                        <FormFeedback className={classes.feedback} error>
-                          {submitError}
-                        </FormFeedback>
-                      ) : null
-                    }
-                  </FormSpy>
+                <Form
+                  onSubmit={this.handleSignup}
+                  subscription={{ submitting: true }}
+                  validate={this.validateForm}
+                  onChange={this.handleFormChange}
+                >
+                  {({ handleSubmit, submitting, onChange }) => (
+                    <form onSubmit={handleSubmit} className={muiClasses.form} noValidate>
+                      <Field
+                        autoComplete='email'
+                        autoFocus
+                        component={RFTextField}
+                        disabled={submitting || formSent}
+                        fullWidth
+                        label='Email'
+                        margin='normal'
+                        name='email'
+                        required
+                        size='large'
+                      />
+                      <Field
+                        fullWidth
+                        size='large'
+                        component={RFTextField}
+                        disabled={submitting || formSent}
+                        required
+                        name='password'
+                        autoComplete='current-password'
+                        label='Password'
+                        type={showPassword ? 'text' : 'password'}
+                        margin='normal'
+                        InputProps={{
+                          endAdornment: (
+                            <div style={{ position: 'absolute', right: 24 }}>
+                              <InputAdornment position='end'>
+                                <IconButton
+                                  aria-label='toggle password visibility'
+                                  onClick={event =>
+                                    this.setState(prevState => ({
+                                      showPassword: !prevState.showPassword
+                                    }))
+                                  }
+                                  onMouseDown={event => event.preventDefault()}
+                                  edge='end'
+                                >
+                                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                              </InputAdornment>
+                            </div>
+                          )
+                        }}
+                      />
+                      {/* High Performance with Subscriptions */}
+                      {/* https://final-form.org/docs/react-final-form/examples/subscriptions */}
+                      <FormSpy subscription={{ submitError: true }}>
+                        {({ submitError }) =>
+                          submitError ? (
+                            <FormFeedback className={muiClasses.feedback} error>
+                              {submitError}
+                            </FormFeedback>
+                          ) : null
+                        }
+                      </FormSpy>
+                      <Typography variant='h3' gutterBottom align='center'></Typography>
+                      <FormButton
+                        aria-label='Submit form to sign up with email and password'
+                        className={muiClasses.button}
+                        disabled={submitting || formSent}
+                        size='large'
+                        color='secondary'
+                        fullWidth
+                      >
+                        {submitting || formSent ? 'In progress…' : 'Sign up'}
+                      </FormButton>
+                    </form>
+                  )}
+                </Form>
+                <div style={{ marginTop: 16, marginBottom: 24 }}>
+                  <Typography variant='body2' align='center'>
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        this.setState({ signupClicked: false, resetPasswordClicked: false })
+                      }
+                    >
+                      {'Sign in'}
+                    </span>
+                    <span
+                      style={{
+                        backgroundColor: '#69696a',
+                        padding: 0.5,
+                        paddingTop: 4,
+                        paddingBottom: 4,
+                        marginLeft: 24,
+                        marginRight: 24
+                      }}
+                    />
+
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        this.setState({ resetPasswordClicked: true, signupClicked: false })
+                      }
+                    >
+                      Reset password
+                    </span>
+                  </Typography>
+                </div>
+              </Container>
+            )}
+            {resetPasswordClicked && (
+              <Container>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexFlow: 'column nowrap',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                    alignContent: 'center'
+                  }}
+                >
+                  <PiggyBankLogo width={250} height={250} />
+                  <Typography variant='h3' gutterBottom marked='center' align='center'>
+                    Welcome!
+                  </Typography>
+                  <Typography variant='body2' align='center'>
+                    Enter your email to send password reset instructions.
+                  </Typography>
+                </div>
+
+                <Form
+                  onSubmit={this.handleResetPassword}
+                  subscription={{ submitting: true }}
+                  validate={this.validateForm}
+                  onChange={this.handleFormChange}
+                >
+                  {({ handleSubmit, submitting, onChange }) => (
+                    <form onSubmit={handleSubmit} className={muiClasses.form} noValidate>
+                      <Field
+                        autoComplete='email'
+                        autoFocus
+                        component={RFTextField}
+                        disabled={submitting || formSent}
+                        fullWidth
+                        label='Email'
+                        margin='normal'
+                        name='email'
+                        required
+                        size='large'
+                      />
+                      {/* High Performance with Subscriptions */}
+                      {/* https://final-form.org/docs/react-final-form/examples/subscriptions */}
+                      <FormSpy subscription={{ submitError: true }}>
+                        {({ submitError }) =>
+                          submitError ? (
+                            <FormFeedback className={muiClasses.feedback} error>
+                              {submitError}
+                            </FormFeedback>
+                          ) : null
+                        }
+                      </FormSpy>
+                      <Typography variant='h3' gutterBottom align='center'></Typography>
+                      <FormButton
+                        aria-label='Submit form to request password reset'
+                        className={muiClasses.button}
+                        disabled={submitting || formSent}
+                        size='large'
+                        color='secondary'
+                        fullWidth
+                      >
+                        {submitting || formSent ? 'In progress…' : 'Request Password Reset'}
+                      </FormButton>
+                    </form>
+                  )}
+                </Form>
+                <div style={{ marginTop: 16, marginBottom: 24 }}>
+                  <Typography variant='body2' align='center'>
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        this.setState({ signupClicked: true, resetPasswordClicked: false })
+                      }
+                    >
+                      {'Sign up'}
+                    </span>
+                    <span
+                      style={{
+                        backgroundColor: '#69696a',
+                        padding: 0.5,
+                        paddingTop: 4,
+                        paddingBottom: 4,
+                        marginLeft: 24,
+                        marginRight: 24
+                      }}
+                    />
+
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        this.setState({ resetPasswordClicked: false, signupClicked: false })
+                      }
+                    >
+                      Sign in
+                    </span>
+                  </Typography>
+                </div>
+              </Container>
+            )}
+            {!signupClicked && !resetPasswordClicked && (
+              <Container>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexFlow: 'column nowrap',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                    alignContent: 'center'
+                  }}
+                >
+                  <PiggyBankLogo width={250} height={250} />
+                  <Typography variant='h3' gutterBottom marked='center' align='center'>
+                    Welcome!
+                  </Typography>
+                  <Typography variant='body2' align='center'>
+                    Please sign in to continue.
+                  </Typography>
+                </div>
+
+                <Form
+                  onSubmit={this.handleLogin}
+                  subscription={{ submitting: true }}
+                  validate={this.validateForm}
+                  onChange={this.handleFormChange}
+                >
+                  {({ handleSubmit, submitting, onChange }) => (
+                    <form onSubmit={handleSubmit} className={muiClasses.form} noValidate>
+                      <Field
+                        autoComplete='email'
+                        autoFocus
+                        component={RFTextField}
+                        disabled={submitting || formSent}
+                        fullWidth
+                        label='Email'
+                        margin='normal'
+                        name='email'
+                        required
+                        size='large'
+                      />
+                      <Field
+                        fullWidth
+                        size='large'
+                        component={RFTextField}
+                        disabled={submitting || formSent}
+                        required
+                        name='password'
+                        autoComplete='current-password'
+                        label='Password'
+                        type={showPassword ? 'text' : 'password'}
+                        margin='normal'
+                        InputProps={{
+                          endAdornment: (
+                            <div style={{ position: 'absolute', right: 24 }}>
+                              <InputAdornment position='end'>
+                                <IconButton
+                                  aria-label='toggle password visibility'
+                                  onClick={event =>
+                                    this.setState(prevState => ({
+                                      showPassword: !prevState.showPassword
+                                    }))
+                                  }
+                                  onMouseDown={event => event.preventDefault()}
+                                  edge='end'
+                                >
+                                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                              </InputAdornment>
+                            </div>
+                          )
+                        }}
+                      />
+                      {/* High Performance with Subscriptions */}
+                      {/* https://final-form.org/docs/react-final-form/examples/subscriptions */}
+                      <FormSpy subscription={{ submitError: true }}>
+                        {({ submitError }) =>
+                          submitError ? (
+                            <FormFeedback className={muiClasses.feedback} error>
+                              {submitError}
+                            </FormFeedback>
+                          ) : null
+                        }
+                      </FormSpy>
+                      <Typography variant='h3' gutterBottom align='center'></Typography>
+                      <FormButton
+                        aria-label='Submit form to login with email and password'
+                        className={muiClasses.button}
+                        disabled={submitting || formSent}
+                        size='large'
+                        color='secondary'
+                        fullWidth
+                      >
+                        {submitting || formSent ? 'In progress…' : 'Sign In'}
+                      </FormButton>
+                    </form>
+                  )}
+                </Form>
+                <div style={{ marginTop: 16, marginBottom: 24 }}>
+                  <Typography variant='body2' align='center'>
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        this.setState({ signupClicked: true, resetPasswordClicked: false })
+                      }
+                    >
+                      {'Sign up'}
+                    </span>
+                    <span
+                      style={{
+                        backgroundColor: '#69696a',
+                        padding: 0.5,
+                        paddingTop: 4,
+                        paddingBottom: 4,
+                        marginLeft: 24,
+                        marginRight: 24
+                      }}
+                    />
+
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        this.setState({ resetPasswordClicked: true, signupClicked: false })
+                      }
+                    >
+                      Reset password
+                    </span>
+                  </Typography>
+                </div>
+                <Fragment>
                   <Typography variant='h3' gutterBottom align='center'></Typography>
-                  <FormButton
-                    aria-label='Submit form to login with email and password'
-                    className={classes.button}
-                    disabled={submitting || sent}
+                  <Button
+                    aria-label='Sign in with Google'
+                    onClick={this.handleOauthLogin}
+                    disabled={oauthLoginClicked}
+                    type='button'
+                    variant='contained'
+                    className={muiClasses.button}
                     size='large'
-                    color='secondary'
+                    // color='secondary'
+                    color='primary'
                     fullWidth
                   >
-                    {submitting || sent ? 'In progress…' : 'Sign In'}
-                  </FormButton>
-                </form>
-              )}
-            </Form>
-            <div style={{ marginTop: 16, marginBottom: 24 }}>
-              <Typography variant='body2' align='center'>
-                <MuiLink align='center' underline='always'>
-                  {'Sign up'}
-                </MuiLink>
-                <span
-                  style={{
-                    backgroundColor: '#69696a',
-                    padding: 0.5,
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    marginLeft: 24,
-                    marginRight: 24
-                  }}
-                />
-                <MuiLink underline='always'>Forgot password?</MuiLink>
-              </Typography>
-            </div>
-            <Fragment>
-              <Typography variant='h3' gutterBottom align='center'></Typography>
-              <Button
-                aria-label='Sign in with Google'
-                onClick={this.handleOauthLoginPress}
-                disabled={oauthLoginPressed}
-                type='button'
-                variant='contained'
-                className={classes.button}
-                size='large'
-                // color='secondary'
-                color='primary'
-                fullWidth
-              >
-                {oauthLoginPressed ? 'In progress…' : 'Sign in with Google'}
-              </Button>
-            </Fragment>
-          </Container>
+                    {oauthLoginClicked ? 'In progress…' : 'Sign in with Google'}
+                  </Button>
+                </Fragment>
+              </Container>
+            )}
+          </>
         )}
       </Fragment>
     );
