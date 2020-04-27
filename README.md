@@ -6,7 +6,8 @@
   Budget Planner
 </h3>
 
-<p align="center">A simple budgeting app that tells potential savings based on user data.</p>
+<p align="center">A simple budget planning app that tells potential savings based on user data.</p>
+<p align="center">Web responsive SPA, built using React, Redux, Firebase with OAuth integration.</p>
 
 <p align="center">
   <a href="https://react-budget-planner.web.app/">Live</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;

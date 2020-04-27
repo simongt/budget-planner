@@ -8,7 +8,8 @@ const config = {
   entry: ['react-hot-loader/patch', './src/index.js'],
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    publicPath: '/'
   },
   context: __dirname,
   target: 'web',
@@ -86,7 +87,8 @@ const config = {
     }
   },
   devServer: {
-    contentBase: './dist'
+    contentBase: './dist',
+    historyApiFallback: true
   },
   plugins: [
     new HtmlWebpackPlugin({

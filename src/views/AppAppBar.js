@@ -60,7 +60,7 @@ const NavbarTooltip = withStyles(theme => ({
 }))(Tooltip);
 
 function AppAppBar(props) {
-  const { classes, authenticated, oauthLogin, logout } = props;
+  const { classes, authenticated, signup, login, handleLogout } = props;
   const [tooltipIsOpen, setTooltipIsOpen] = React.useState(true);
 
   const handleTooltipClose = (delay = 0) => {
@@ -110,7 +110,7 @@ function AppAppBar(props) {
                     variant='h6'
                     underline='none'
                     className={classes.rightLink}
-                    onClick={logout}
+                    onClick={handleLogout}
                   >
                     {'Log Out'}
                   </MuiLink>
@@ -131,8 +131,8 @@ function AppAppBar(props) {
                   arrow
                 >
                   <MuiLink
-                    aria-label='Sign in with Google'
-                    onClick={oauthLogin}
+                    aria-label='Sign in by either email or Google'
+                    onClick={login}
                     color='inherit'
                     variant='h6'
                     underline='none'
@@ -146,9 +146,7 @@ function AppAppBar(props) {
                   variant='h6'
                   underline='none'
                   className={clsx(classes.rightLink, classes.linkSecondary)}
-                  onClick={() => {
-                    console.log('Sign up pressed.');
-                  }}
+                  onClick={signup}
                 >
                   {'Sign Up'}
                 </MuiLink>
