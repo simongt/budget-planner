@@ -404,8 +404,8 @@ class Home extends Component {
     );
   };
 
-  handleLogoutPress = () => {
-    console.log('Home --> handleLogoutPress');
+  handleLogout = () => {
+    console.log('Home --> handleLogout');
     event.preventDefault();
     this.setState({ error: '', logoutClicked: true }, () => {
       auth()
@@ -618,7 +618,7 @@ class Home extends Component {
           authenticated={authenticated}
           signup={() => this.setState({ signupClicked: true, resetPasswordClicked: false })}
           login={() => this.setState({ signupClicked: false, resetPasswordClicked: false })}
-          handleLogoutPress={this.handleLogoutPress}
+          handleLogout={this.handleLogout}
         />
         {authenticated ? (
           <Fragment>
