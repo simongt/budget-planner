@@ -30,46 +30,31 @@ import PieChart, {
   Tooltip as PCTooltip,
   Subtitle
 } from 'devextreme-react/pie-chart';
-import Typography from '../components/Typography';
-import AppAppBar from './AppAppBar';
+import Typography from './Typography';
+import TopNavBar from './TopNavBar';
 import Container from './Container';
-import TextField from '../components/TextField';
-import Button from '../components/Button';
-import RFTextField from '../components/form/RFTextField';
-import FormButton from '../components/form/FormButton';
-import FormFeedback from '../components/form/FormFeedback';
-import { email, required } from '../components/form/validation';
+import TextField from './TextField';
+import Button from './Button';
+import RFTextField from './form/RFTextField';
+import FormButton from './form/FormButton';
+import FormFeedback from './form/FormFeedback';
+import { email, required } from './form/validation';
 // import { connect } from 'react-redux';
 import { auth, signinWithGoogle } from '../services/firebase';
 import { sleep } from '../util';
+// notifications styling config
 import 'react-toastify/dist/ReactToastify.css';
+// pie chart styling config
 import 'devextreme/dist/css/dx.common.css';
 import 'devextreme/dist/css/dx.light.css';
-
 // constants
-const MIN_ELECTION = 1;
-const MAX_ELECTION = 30; // <= 30%
-const MIN_ANNUAL_SALARY = 1;
-const MAX_ANNUAL_SALARY = 1000000000; // <= $1B
-
-const currencies = [
-  {
-    value: 'USD',
-    label: '$'
-  },
-  {
-    value: 'EUR',
-    label: '€'
-  },
-  {
-    value: 'BTC',
-    label: '฿'
-  },
-  {
-    value: 'JPY',
-    label: '¥'
-  }
-];
+import {
+  MIN_ELECTION,
+  MAX_ELECTION,
+  MIN_ANNUAL_SALARY,
+  MAX_ANNUAL_SALARY,
+  currencies
+} from '../data/constants';
 
 const SliderTooltip = withStyles(theme => ({
   tooltip: {
@@ -110,32 +95,59 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // each component has its own loading value to avoid rendering until data has loaded
       loading: true,
+      // TODO: refactor with Redux
       authenticated: false,
+      // TODO: refactor with Redux
       user: null,
+      // TODO: refactor with Redux
       error: null,
+      // provided as form input from user
       email: '',
+      // provided as form input from user
       password: '',
+      // if true, reveal password as clear text within form field
       showPassword: false,
-      emailLoginClicked: false,
+      // triggers toggling of clickability on button while OAuth signin is being processed
       oauthLoginClicked: false,
+      // triggers transition from private to public route, firebase signout
       logoutClicked: false,
+      // triggers loading of signup form for new users
       signupClicked: false,
+      // triggers loading of password recovery form
       resetPasswordClicked: false,
+      // injects material ui theme into specific components (e.g. form, button, feedback, slider)
       muiClasses: null,
+      // triggers appropriate action upon submitting form (signin, signup, password reset)
       formSent: false,
+      // value indicates percentage of salary to elect as expenses per month (Number)
       election: 15, // TODO: animate from min value
+      // array of values to label marks along the bottom of slider (like units of measurement)
       electedExpenseSliderMarks: [],
+      // triggers toggling between displaying election as static element and as an input field
       electedExpenseInputMode: false,
+      // triggers visibility of tooltip (is currently set to only show for the first few seconds)
       electedExpenseTooltipVisible: true,
+      // value indicates user's annual salary (Number)
       annualSalary: 75000, // TODO: animate from min value
+      // triggers toggling between displaying election as static element and as an input field
       annualSalaryInputMode: false,
+      // triggers visibility of tooltip (is currently set to only show for the first few seconds)
       annualSalaryTooltipVisible: true,
+      // value calculated using election and salary (String), TODO: refactor to keep as Number
       monthlyExpenses: null,
+      // value calculated using election and salary (String), TODO: refactor to keep as Number
       monthlySavings: null,
+      // array of objects with data for pie chart
+      // each object consists of { label, amount }
+      // represents data pertaining to election, salary
       budgetData: [],
+      // triggers compilation of budget data, loads component displaying pie chart
       budgetFormSubmitted: false,
+      // triggers visibility of tooltip (is currently set to only show for the first few seconds)
       sliderTooltipVisible: true,
+      // TODO: implement dropdown that allows user choice between different currencies
       currency: {
         value: 'USD',
         label: '$'
@@ -335,7 +347,6 @@ class Home extends Component {
         error: '',
         email: values.email,
         password: values.password,
-        emailLoginClicked: true,
         formSent: true
       },
       () => {
@@ -344,13 +355,13 @@ class Home extends Component {
           .then(result => {
             console.log(result);
             toast.success('👍 Email sign-up successful.');
-            this.setState({ user: auth().currentUser, emailLoginClicked: false, formSent: false });
+            this.setState({ user: auth().currentUser, formSent: false });
           })
           .catch(error => {
             const errorCode = error.code;
             const errorMessage = error.message;
             toast.error('🧐' + error.message);
-            this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+            this.setState({ error: error.message, formSent: false });
           });
       }
     );
@@ -364,7 +375,6 @@ class Home extends Component {
         error: '',
         email: values.email,
         password: values.password,
-        emailLoginClicked: true,
         formSent: true
       },
       () => {
@@ -376,7 +386,6 @@ class Home extends Component {
               toast.success('👍 Email sign-in successful.');
               this.setState({
                 user: auth().currentUser,
-                emailLoginClicked: false,
                 formSent: false
               });
             },
@@ -384,7 +393,7 @@ class Home extends Component {
               const errorCode = error.code;
               const errorMessage = error.message;
               toast.error('🧐' + error.message);
-              this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+              this.setState({ error: error.message, formSent: false });
             }
           );
       }
@@ -607,12 +616,14 @@ class Home extends Component {
       email,
       password,
       showPassword,
+      oauthLoginClicked,
+      logoutClicked,
+      signupClicked,
+      resetPasswordClicked,
       muiClasses,
       formSent,
-      oauthLoginClicked,
-      currency,
-      electedExpenseSliderMarks,
       election,
+      electedExpenseSliderMarks,
       electedExpenseInputMode,
       electedExpenseTooltipVisible,
       annualSalary,
@@ -623,15 +634,14 @@ class Home extends Component {
       budgetData,
       budgetFormSubmitted,
       sliderTooltipVisible,
-      signupClicked,
-      resetPasswordClicked
+      currency
     } = this.state;
     return loading ? (
       <LinearProgress color='secondary' />
     ) : (
       <Fragment>
         {/* TODO: add left section when logged in for choosing currency */}
-        <AppAppBar
+        <TopNavBar
           authenticated={authenticated}
           signup={() => this.setState({ signupClicked: true, resetPasswordClicked: false })}
           login={() => this.setState({ signupClicked: false, resetPasswordClicked: false })}
