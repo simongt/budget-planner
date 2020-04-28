@@ -95,32 +95,61 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // each component has its own loading value to avoid rendering until data has loaded
       loading: true,
+      // TODO: refactor with Redux
       authenticated: false,
+      // TODO: refactor with Redux
       user: null,
+      // TODO: refactor with Redux
       error: null,
+      // provided as form input from user
       email: '',
+      // provided as form input from user
       password: '',
+      // if true, reveal password as clear text within form field
       showPassword: false,
+      // TODO: can be removed, functionality is same as formSent
       emailLoginClicked: false,
+      // triggers toggling of clickability on button while OAuth signin is being processed
       oauthLoginClicked: false,
+      // triggers transition from private to public route, firebase signout
       logoutClicked: false,
+      // triggers loading of signup form for new users
       signupClicked: false,
+      // triggers loading of password recovery form
       resetPasswordClicked: false,
+      // injects material ui theme into specific components (e.g. form, button, feedback, slider)
       muiClasses: null,
+      // triggers appropriate action upon submitting form (signin, signup, password reset)
       formSent: false,
+      // value indicates percentage of salary to elect as expenses per month (Number)
       election: 15, // TODO: animate from min value
+      // array of values to label marks along the bottom of slider (like units of measurement)
       electedExpenseSliderMarks: [],
+      // triggers toggling between displaying election as static element and as an input field
       electedExpenseInputMode: false,
+      // triggers visibility of tooltip (is currently set to only show for the first few seconds)
       electedExpenseTooltipVisible: true,
+      // value indicates user's annual salary (Number)
       annualSalary: 75000, // TODO: animate from min value
+      // triggers toggling between displaying election as static element and as an input field
       annualSalaryInputMode: false,
+      // triggers visibility of tooltip (is currently set to only show for the first few seconds)
       annualSalaryTooltipVisible: true,
+      // value calculated using election and salary (String), TODO: refactor to keep as Number
       monthlyExpenses: null,
+      // value calculated using election and salary (String), TODO: refactor to keep as Number
       monthlySavings: null,
+      // array of objects with data for pie chart
+      // each object consists of { label, amount }
+      // represents data pertaining to election, salary
       budgetData: [],
+      // triggers compilation of budget data, loads component displaying pie chart
       budgetFormSubmitted: false,
+      // triggers visibility of tooltip (is currently set to only show for the first few seconds)
       sliderTooltipVisible: true,
+      // TODO: implement dropdown that allows user choice between different currencies
       currency: {
         value: 'USD',
         label: '$'
@@ -592,12 +621,15 @@ class Home extends Component {
       email,
       password,
       showPassword,
+      emailLoginClicked,
+      oauthLoginClicked,
+      logoutClicked,
+      signupClicked,
+      resetPasswordClicked,
       muiClasses,
       formSent,
-      oauthLoginClicked,
-      currency,
-      electedExpenseSliderMarks,
       election,
+      electedExpenseSliderMarks,
       electedExpenseInputMode,
       electedExpenseTooltipVisible,
       annualSalary,
@@ -608,8 +640,7 @@ class Home extends Component {
       budgetData,
       budgetFormSubmitted,
       sliderTooltipVisible,
-      signupClicked,
-      resetPasswordClicked
+      currency
     } = this.state;
     return loading ? (
       <LinearProgress color='secondary' />
