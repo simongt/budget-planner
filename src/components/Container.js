@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Box, Container as MuiContainer } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '../components/Paper';
+import Paper from './Paper';
 
 const styles = theme => ({
   root: {

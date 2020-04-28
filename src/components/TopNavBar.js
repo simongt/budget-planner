@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 import Img from 'react-cool-img';
 import { withWidth, withStyles, Tooltip, Link as MuiLink } from '@material-ui/core';
 import { isWidthUp } from '@material-ui/core/withWidth';
-import AppBar from '../components/AppBar';
-import Toolbar, { styles as toolbarStyles } from '../components/Toolbar';
+import AppBar from './AppBar';
+import Toolbar, { styles as toolbarStyles } from './Toolbar';
 import { sleep } from '../util';
 
 const styles = theme => ({
@@ -59,7 +59,7 @@ const NavbarTooltip = withStyles(theme => ({
   }
 }))(Tooltip);
 
-function AppAppBar(props) {
+function TopNavBar(props) {
   const { classes, authenticated, signup, login, handleLogout } = props;
   const [tooltipIsOpen, setTooltipIsOpen] = React.useState(true);
 
@@ -160,9 +160,9 @@ function AppAppBar(props) {
   );
 }
 
-AppAppBar.propTypes = {
+TopNavBar.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-// export default withStyles(styles)(AppAppBar);
-export default withWidth()(withStyles(styles)(AppAppBar));
+// export default withStyles(styles)(TopNavBar);
+export default withWidth()(withStyles(styles)(TopNavBar));

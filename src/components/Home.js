@@ -30,15 +30,15 @@ import PieChart, {
   Tooltip as PCTooltip,
   Subtitle
 } from 'devextreme-react/pie-chart';
-import Typography from '../components/Typography';
-import AppAppBar from './AppAppBar';
+import Typography from './Typography';
+import TopNavBar from './TopNavBar';
 import Container from './Container';
-import TextField from '../components/TextField';
-import Button from '../components/Button';
-import RFTextField from '../components/form/RFTextField';
-import FormButton from '../components/form/FormButton';
-import FormFeedback from '../components/form/FormFeedback';
-import { email, required } from '../components/form/validation';
+import TextField from './TextField';
+import Button from './Button';
+import RFTextField from './form/RFTextField';
+import FormButton from './form/FormButton';
+import FormFeedback from './form/FormFeedback';
+import { email, required } from './form/validation';
 // import { connect } from 'react-redux';
 import { auth, signinWithGoogle } from '../services/firebase';
 import { sleep } from '../util';
@@ -631,7 +631,7 @@ class Home extends Component {
     ) : (
       <Fragment>
         {/* TODO: add left section when logged in for choosing currency */}
-        <AppAppBar
+        <TopNavBar
           authenticated={authenticated}
           signup={() => this.setState({ signupClicked: true, resetPasswordClicked: false })}
           login={() => this.setState({ signupClicked: false, resetPasswordClicked: false })}
