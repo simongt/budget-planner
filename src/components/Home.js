@@ -39,8 +39,8 @@ import RFTextField from './form/RFTextField';
 import FormButton from './form/FormButton';
 import FormFeedback from './form/FormFeedback';
 import { email, required } from './form/validation';
-// import { connect } from 'react-redux';
-import { auth, signinWithGoogle } from '../services/firebase';
+import { connect } from 'react-redux';
+import { auth } from '../services/firebase';
 import { sleep } from '../util';
 // notifications styling config
 import 'react-toastify/dist/ReactToastify.css';
@@ -1549,12 +1549,8 @@ class Home extends Component {
   }
 }
 
-// const mapStateToProps = (state) => ({});
+const mapStateToProps = state => ({});
 
-// const mapDispatchToProps = {};
+const mapDispatchToProps = {};
 
-// export default connect(mapStateToProps, mapDispatchToProps)(Home);
-
-// export default Home;
-
-export default withRoot(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(withRoot(Home));

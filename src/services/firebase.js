@@ -20,15 +20,6 @@ export const auth = firebase.auth;
 export const db = firebase.database();
 export const firestore = firebase.firestore();
 
-const provider = new firebase.auth.GoogleAuthProvider();
-// always trigger google pop up whenever we use this auth google provider to sign in
-provider.setCustomParameters({ prompt: 'select_account' });
-export const signInWithGoogle = () => auth.signInWithPopup(provider);
-
-export function signup(email, password) {
-  return auth().createUserWithEmailAndPassword(email, password);
-}
-
 // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 // The Firebase SDK is initialized and available here!
 //

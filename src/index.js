@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import Root from './Root';
 import { toast, Slide } from 'react-toastify';
 import 'typeface-roboto';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,4 +25,4 @@ toast.configure({
 
 console.log('src/index.js <-- app entry point', wrapper);
 
-wrapper ? ReactDOM.render(<App />, wrapper) : false;
+wrapper ? ReactDOM.render(<Root />, wrapper) : false;
