@@ -42,34 +42,19 @@ import { email, required } from './form/validation';
 // import { connect } from 'react-redux';
 import { auth, signinWithGoogle } from '../services/firebase';
 import { sleep } from '../util';
+// notifications styling config
 import 'react-toastify/dist/ReactToastify.css';
+// pie chart styling config
 import 'devextreme/dist/css/dx.common.css';
 import 'devextreme/dist/css/dx.light.css';
-
 // constants
-const MIN_ELECTION = 1;
-const MAX_ELECTION = 30; // <= 30%
-const MIN_ANNUAL_SALARY = 1;
-const MAX_ANNUAL_SALARY = 1000000000; // <= $1B
-
-const currencies = [
-  {
-    value: 'USD',
-    label: '$'
-  },
-  {
-    value: 'EUR',
-    label: '€'
-  },
-  {
-    value: 'BTC',
-    label: '฿'
-  },
-  {
-    value: 'JPY',
-    label: '¥'
-  }
-];
+import {
+  MIN_ELECTION,
+  MAX_ELECTION,
+  MIN_ANNUAL_SALARY,
+  MAX_ANNUAL_SALARY,
+  currencies
+} from '../data/constants';
 
 const SliderTooltip = withStyles(theme => ({
   tooltip: {
