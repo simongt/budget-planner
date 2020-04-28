@@ -97,11 +97,11 @@ class Home extends Component {
     this.state = {
       // each component has its own loading value to avoid rendering until data has loaded
       loading: true,
-      // TODO: refactor with Redux
+      // triggers transition from private to public route,
       authenticated: false,
-      // TODO: refactor with Redux
+      // object from firebase with user data
       user: null,
-      // TODO: refactor with Redux
+      // error message seen in notifications (e.g. returned from firebase auth)
       error: null,
       // provided as form input from user
       email: '',
