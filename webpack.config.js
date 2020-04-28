@@ -81,7 +81,8 @@ const config = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.css'],
+    modules: ['node_modules'],
     alias: {
       'react-dom': '@hot-loader/react-dom'
     }
