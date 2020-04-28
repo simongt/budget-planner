@@ -11,9 +11,8 @@ function isDirty(value) {
 export function required(requiredFields, values) {
   return requiredFields.reduce(
     (fields, field) => ({
-      ...fields
-      // ...fields,
-      // ...(isDirty(values[field]) ? undefined : { [field]: 'Required' })
+      ...fields,
+      ...(isDirty(values[field]) ? undefined : { [field]: 'Required' })
     }),
     {}
   );
