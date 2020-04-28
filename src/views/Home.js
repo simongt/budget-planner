@@ -316,6 +316,17 @@ class Home extends Component {
     return errors;
   };
 
+  validateEmailForm = values => {
+    const errors = required(['email'], values);
+    if (!errors.email) {
+      const emailError = email(values.email, values);
+      if (emailError) {
+        errors.email = email(values.email, values);
+      }
+    }
+    return errors;
+  };
+
   handleSignup = values => {
     console.log('Home --> handleSignup', values);
     event.preventDefault();
@@ -1298,7 +1309,7 @@ class Home extends Component {
                 <Form
                   onSubmit={this.handleResetPassword}
                   subscription={{ submitting: true }}
-                  validate={this.validateForm}
+                  validate={this.validateEmailForm}
                   onChange={this.handleFormChange}
                 >
                   {({ handleSubmit, submitting }) => (
