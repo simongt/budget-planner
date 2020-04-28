@@ -359,17 +359,23 @@ class Home extends Component {
       () => {
         auth()
           .signInWithEmailAndPassword(this.state.email, this.state.password)
-          .then(result => {
-            console.log(result);
-            toast.success('👍 Email sign-in successful.');
-            this.setState({ user: auth().currentUser, emailLoginClicked: false, formSent: false });
-          })
-          .catch(error => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            toast.error('🧐' + error.message);
-            this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
-          });
+          .then(
+            result => {
+              console.log(result);
+              toast.success('👍 Email sign-in successful.');
+              this.setState({
+                user: auth().currentUser,
+                emailLoginClicked: false,
+                formSent: false
+              });
+            },
+            error => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              toast.error('🧐' + error.message);
+              this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+            }
+          );
       }
     );
   };
@@ -1164,7 +1170,7 @@ class Home extends Component {
                   validate={this.validateForm}
                   onChange={this.handleFormChange}
                 >
-                  {({ handleSubmit, submitting, onChange }) => (
+                  {({ handleSubmit, submitting }) => (
                     <form onSubmit={handleSubmit} className={muiClasses.form} noValidate>
                       <Field
                         autoComplete='email'
@@ -1221,17 +1227,18 @@ class Home extends Component {
                           ) : null
                         }
                       </FormSpy>
-                      <Typography variant='h3' gutterBottom align='center'></Typography>
-                      <FormButton
-                        aria-label='Submit form to sign up with email and password'
-                        className={muiClasses.button}
-                        disabled={submitting || formSent}
-                        size='large'
-                        color='secondary'
-                        fullWidth
-                      >
-                        {submitting || formSent ? 'In progress…' : 'Sign up'}
-                      </FormButton>
+                      <div style={{ marginTop: 36 }}>
+                        <FormButton
+                          aria-label='Submit form to sign up with email and password'
+                          className={muiClasses.button}
+                          disabled={submitting || formSent}
+                          size='large'
+                          color='secondary'
+                          fullWidth
+                        >
+                          {submitting || formSent ? 'In progress…' : 'Sign up'}
+                        </FormButton>
+                      </div>
                     </form>
                   )}
                 </Form>
@@ -1294,7 +1301,7 @@ class Home extends Component {
                   validate={this.validateForm}
                   onChange={this.handleFormChange}
                 >
-                  {({ handleSubmit, submitting, onChange }) => (
+                  {({ handleSubmit, submitting }) => (
                     <form onSubmit={handleSubmit} className={muiClasses.form} noValidate>
                       <Field
                         autoComplete='email'
@@ -1319,17 +1326,18 @@ class Home extends Component {
                           ) : null
                         }
                       </FormSpy>
-                      <Typography variant='h3' gutterBottom align='center'></Typography>
-                      <FormButton
-                        aria-label='Submit form to request password reset'
-                        className={muiClasses.button}
-                        disabled={submitting || formSent}
-                        size='large'
-                        color='secondary'
-                        fullWidth
-                      >
-                        {submitting || formSent ? 'In progress…' : 'Request Password Reset'}
-                      </FormButton>
+                      <div style={{ marginTop: 36 }}>
+                        <FormButton
+                          aria-label='Submit form to request password reset'
+                          className={muiClasses.button}
+                          disabled={submitting || formSent}
+                          size='large'
+                          color='secondary'
+                          fullWidth
+                        >
+                          {submitting || formSent ? 'In progress…' : 'Request Password Reset'}
+                        </FormButton>
+                      </div>
                     </form>
                   )}
                 </Form>
@@ -1392,7 +1400,7 @@ class Home extends Component {
                   validate={this.validateForm}
                   onChange={this.handleFormChange}
                 >
-                  {({ handleSubmit, submitting, onChange }) => (
+                  {({ handleSubmit, submitting }) => (
                     <form onSubmit={handleSubmit} className={muiClasses.form} noValidate>
                       <Field
                         autoComplete='email'
@@ -1449,17 +1457,18 @@ class Home extends Component {
                           ) : null
                         }
                       </FormSpy>
-                      <Typography variant='h3' gutterBottom align='center'></Typography>
-                      <FormButton
-                        aria-label='Submit form to login with email and password'
-                        className={muiClasses.button}
-                        disabled={submitting || formSent}
-                        size='large'
-                        color='secondary'
-                        fullWidth
-                      >
-                        {submitting || formSent ? 'In progress…' : 'Sign In'}
-                      </FormButton>
+                      <div style={{ marginTop: 36 }}>
+                        <FormButton
+                          aria-label='Submit form to login with email and password'
+                          className={muiClasses.button}
+                          disabled={submitting || formSent}
+                          size='large'
+                          color='secondary'
+                          fullWidth
+                        >
+                          {submitting || formSent ? 'In progress…' : 'Sign In'}
+                        </FormButton>
+                      </div>
                     </form>
                   )}
                 </Form>
@@ -1495,7 +1504,6 @@ class Home extends Component {
                   </Typography>
                 </div>
                 <Fragment>
-                  <Typography variant='h3' gutterBottom align='center'></Typography>
                   <Button
                     aria-label='Sign in with Google'
                     onClick={this.handleOauthLogin}
