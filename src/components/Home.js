@@ -109,8 +109,6 @@ class Home extends Component {
       password: '',
       // if true, reveal password as clear text within form field
       showPassword: false,
-      // TODO: can be removed, functionality is same as formSent
-      emailLoginClicked: false,
       // triggers toggling of clickability on button while OAuth signin is being processed
       oauthLoginClicked: false,
       // triggers transition from private to public route, firebase signout
@@ -349,7 +347,6 @@ class Home extends Component {
         error: '',
         email: values.email,
         password: values.password,
-        emailLoginClicked: true,
         formSent: true
       },
       () => {
@@ -358,13 +355,13 @@ class Home extends Component {
           .then(result => {
             console.log(result);
             toast.success('👍 Email sign-up successful.');
-            this.setState({ user: auth().currentUser, emailLoginClicked: false, formSent: false });
+            this.setState({ user: auth().currentUser, formSent: false });
           })
           .catch(error => {
             const errorCode = error.code;
             const errorMessage = error.message;
             toast.error('🧐' + error.message);
-            this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+            this.setState({ error: error.message, formSent: false });
           });
       }
     );
@@ -378,7 +375,6 @@ class Home extends Component {
         error: '',
         email: values.email,
         password: values.password,
-        emailLoginClicked: true,
         formSent: true
       },
       () => {
@@ -390,7 +386,6 @@ class Home extends Component {
               toast.success('👍 Email sign-in successful.');
               this.setState({
                 user: auth().currentUser,
-                emailLoginClicked: false,
                 formSent: false
               });
             },
@@ -398,7 +393,7 @@ class Home extends Component {
               const errorCode = error.code;
               const errorMessage = error.message;
               toast.error('🧐' + error.message);
-              this.setState({ error: error.message, emailLoginClicked: false, formSent: false });
+              this.setState({ error: error.message, formSent: false });
             }
           );
       }
@@ -621,7 +616,6 @@ class Home extends Component {
       email,
       password,
       showPassword,
-      emailLoginClicked,
       oauthLoginClicked,
       logoutClicked,
       signupClicked,
