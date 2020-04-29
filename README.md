@@ -47,7 +47,7 @@ npm run serve
 open http://localhost:5000/
 ```
 
-### Build and deploy app to Firebase production environemnt.
+### Build and deploy app to Firebase production environment.
 
 ```
 npm run deploy

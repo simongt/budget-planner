@@ -339,6 +339,7 @@ class Home extends Component {
     return errors;
   };
 
+  // TODO: add input field for user's display name
   handleSignup = values => {
     console.log('Home --> handleSignup', values);
     event.preventDefault();
