@@ -355,7 +355,7 @@ class Home extends Component {
           .then(result => {
             console.log(result);
             toast.success('👍 Email sign-up successful.');
-            this.setState({ user: auth().currentUser, formSent: false });
+            this.setState({ authenticated: true, user: auth().currentUser, formSent: false });
           })
           .catch(error => {
             const errorCode = error.code;
@@ -385,6 +385,7 @@ class Home extends Component {
               console.log(result);
               toast.success('👍 Email sign-in successful.');
               this.setState({
+                authenticated: true,
                 user: auth().currentUser,
                 formSent: false
               });
@@ -444,7 +445,6 @@ class Home extends Component {
             email: '',
             password: '',
             showPassword: false,
-            // muiClasses: null,
             formSent: false,
             sliderTooltipVisible: false,
             electedExpenseInputMode: false,
@@ -487,7 +487,12 @@ class Home extends Component {
             const token = result.credential.accessToken;
             console.log('Home --> handleOauthLogin --> firebase.auth.AuthCredential:', credential);
             this.setState(
-              { buttonPressed: false, oauthLoginClicked: false, user: auth().currentUser },
+              {
+                authenticated: true,
+                buttonPressed: false,
+                oauthLoginClicked: false,
+                user: auth().currentUser
+              },
               () => {
                 toast.success('👍 Google sign-in successful.');
               }
@@ -842,10 +847,6 @@ class Home extends Component {
                     {/* Elected Expense */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -983,10 +984,6 @@ class Home extends Component {
                     {/* Annual Salary */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -1080,10 +1077,6 @@ class Home extends Component {
                     {/* Monthly Expenses */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -1107,10 +1100,6 @@ class Home extends Component {
                     {/* Monthly Savings */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
