@@ -1,12 +1,11 @@
-import withRoot from './lib/withRoot';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Login, Signup, Home, Landing, Report, Slider } from './components';
-import { hot } from 'react-hot-loader/root';
 import { connect } from 'react-redux';
-import { auth } from './services/firebase';
-import { Router } from './components/Router';
 import { CircularProgress, LinearProgress } from '@material-ui/core';
+import { hot } from 'react-hot-loader/root';
+import { Login, Signup, Home, Landing, Report, Slider, Router } from './components';
+import { auth } from './services/firebase';
+import withRoot from './lib/withRoot';
 
 // Redux & Redux-persist
 import { Provider } from 'react-redux';

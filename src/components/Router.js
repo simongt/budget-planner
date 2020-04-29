@@ -38,4 +38,4 @@ function Router({ authenticated }) {
   );
 }
 
-export { Router };
+export default Router;
