@@ -22,6 +22,7 @@ class Root extends Component {
 
   componentDidMount() {
     console.log('src/Root.js --> componentDidMount');
+    console.log('src/Root.js --> componentDidMount: Redux store', store);
     auth().onAuthStateChanged(user => {
       if (user) {
         this.setState({
@@ -39,7 +40,7 @@ class Root extends Component {
 
   render() {
     console.log('src/Root.js --> render');
-    // designed to protect from so-called XSRF (cross-site request forgery) attacks
+    // protect from XSRF (cross-site request forgery) attacks
     // see: https://javascript.info/cookie#samesite
     document.cookie = 'SameSite=None; Secure';
     return this.state.loading ? (
@@ -57,9 +58,5 @@ class Root extends Component {
 Root.propTypes = {
   store: PropTypes.object.isRequired
 };
-
-// const mapStateToProps = state => ({});
-// const mapDispatchToProps = {};
-// export default hot(connect(mapStateToProps, mapDispatchToProps)(withRoot(Root)));
 
 export default hot(withRoot(Root));
