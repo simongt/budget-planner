@@ -1,11 +1,17 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
 import { persistStore, persistReducer } from 'redux-persist';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import storage from 'redux-persist/lib/storage';
-import rootReducer from './reducers';
+import { ReactReduxFirebaseProvider, firebaseReducer } from 'react-redux-firebase';
+import { createFirestoreInstance, firestoreReducer } from 'redux-firestore'; // <- needed if using firestore
+// import firebase from 'firebase/app';
+// import 'firebase/auth';
+// import 'firebase/database';
+// import 'firebase/firestore';
+// import { firebaseConfig, firebase, auth, db, firestore } from '../services/firebase';
+import { rootReducer, authReducer, userReducer } from './reducers';
 
 const initialState = {};
 
@@ -24,7 +30,9 @@ const persistConfig = {
 
 // combineReducers maps the reducers to the named key for state object in store
 const reducers = combineReducers({
-  root: rootReducer
+  root: rootReducer,
+  auth: authReducer,
+  user: userReducer
 });
 console.log('Redux store --> reducers', reducers);
 

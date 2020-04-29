@@ -4,17 +4,19 @@ import { sleep } from '../../util';
 // TODO: add types
 import {
   LOADING_UI,
+  LOADING_USER,
   SET_ERRORS,
-  CLEAR_ERRORS,
-  SET_AUTHENTICATED,
-  SET_UNAUTHENTICATED,
-  SET_USER,
+  UNSET_ERRORS,
+  AUTHENTICATED,
   UPDATE_EMAIL,
   UPDATE_PASSWORD,
-  UPDATE_FORM_SENT,
-  LOGIN,
-  SIGNUP,
-  LOADING_USER
+  SUBMITTED_AUTH_FORM,
+  SHOWING_PASSWORD,
+  SET_USER,
+  SET_ELECTION,
+  SET_ANNUAL_SALARY,
+  SUBMITTED_BUDGET_FORM,
+  SET_CURRENCY
 } from '../types';
 
 import { auth } from '../../services/firebase';
