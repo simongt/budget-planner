@@ -40,9 +40,7 @@ class Root extends Component {
 
   render() {
     console.log('src/Root.js --> render');
-    // protect from XSRF (cross-site request forgery) attacks
-    // see: https://javascript.info/cookie#samesite
-    document.cookie = 'SameSite=None; Secure';
+
     return this.state.loading ? (
       <LinearProgress color='secondary' />
     ) : (
