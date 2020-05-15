@@ -39,9 +39,10 @@ import RFTextField from './form/RFTextField';
 import FormButton from './form/FormButton';
 import FormFeedback from './form/FormFeedback';
 import { email, required } from './form/validation';
-// import { connect } from 'react-redux';
-import { auth, signinWithGoogle } from '../services/firebase';
+import { connect } from 'react-redux';
+import { auth } from '../services/firebase';
 import { sleep } from '../util';
+import { handleEmailLogin } from '../redux/actions';
 // notifications styling config
 import 'react-toastify/dist/ReactToastify.css';
 // pie chart styling config
@@ -97,11 +98,11 @@ class Home extends Component {
     this.state = {
       // each component has its own loading value to avoid rendering until data has loaded
       loading: true,
-      // TODO: refactor with Redux
+      // triggers transition from private to public route,
       authenticated: false,
-      // TODO: refactor with Redux
+      // object from firebase with user data
       user: null,
-      // TODO: refactor with Redux
+      // error message seen in notifications (e.g. returned from firebase auth)
       error: null,
       // provided as form input from user
       email: '',
@@ -269,7 +270,17 @@ class Home extends Component {
     );
   };
 
+  // getSnapshotBeforeUpdate = (prevProps, prevState) => {};
+
   componentDidUpdate(prevProps, prevState) {
+    if (prevProps.root.authenticated !== this.props.root.authenticated) {
+      console.log('Home --> componentDidUpdate: User is successfully authenticated.');
+      this.setState({ authenticated: this.props.root.authenticated });
+    }
+    if (prevProps.auth.user !== this.props.auth.user) {
+      console.log("Home --> componentDidUpdate: User's account is successfully loaded.");
+      this.setState({ user: this.props.auth.user });
+    }
     if (
       prevState.election !== this.state.election ||
       prevState.annualSalary !== this.state.annualSalary
@@ -339,6 +350,7 @@ class Home extends Component {
     return errors;
   };
 
+  // TODO: add input field for user's display name
   handleSignup = values => {
     console.log('Home --> handleSignup', values);
     event.preventDefault();
@@ -355,7 +367,7 @@ class Home extends Component {
           .then(result => {
             console.log(result);
             toast.success('👍 Email sign-up successful.');
-            this.setState({ user: auth().currentUser, formSent: false });
+            this.setState({ authenticated: true, user: auth().currentUser, formSent: false });
           })
           .catch(error => {
             const errorCode = error.code;
@@ -367,37 +379,44 @@ class Home extends Component {
     );
   };
 
-  handleLogin = values => {
-    console.log('Home --> handleLogin', values);
+  // wrapper method around redux action of same name
+  handleEmailLogin = values => {
+    console.log('Home --> handleEmailLogin', values);
     event.preventDefault();
-    this.setState(
-      {
-        error: '',
-        email: values.email,
-        password: values.password,
-        formSent: true
-      },
-      () => {
-        auth()
-          .signInWithEmailAndPassword(this.state.email, this.state.password)
-          .then(
-            result => {
-              console.log(result);
-              toast.success('👍 Email sign-in successful.');
-              this.setState({
-                user: auth().currentUser,
-                formSent: false
-              });
-            },
-            error => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              toast.error('🧐' + error.message);
-              this.setState({ error: error.message, formSent: false });
-            }
-          );
-      }
-    );
+    const reenableForm = () => this.setState({ formSent: false });
+    this.setState({ formSent: true }, () => {
+      this.props.handleEmailLogin(values.email, values.password, reenableForm);
+    });
+    // TODO: dispatch form sent and wire it up to this component
+    // this.setState(
+    //   {
+    //     error: '',
+    //     email: values.email,
+    //     password: values.password,
+    //     formSent: true
+    //   },
+    //   () => {
+    //     auth()
+    //       .signInWithEmailAndPassword(this.state.email, this.state.password)
+    //       .then(
+    //         result => {
+    //           console.log(result);
+    //           toast.success('👍 Email sign-in successful.');
+    //           this.setState({
+    //             authenticated: true,
+    //             user: auth().currentUser,
+    //             formSent: false
+    //           });
+    //         },
+    //         error => {
+    //           const errorCode = error.code;
+    //           const errorMessage = error.message;
+    //           toast.error('🧐' + error.message);
+    //           this.setState({ error: error.message, formSent: false });
+    //         }
+    //       );
+    //   }
+    // );
   };
 
   handleResetPassword = values => {
@@ -444,7 +463,6 @@ class Home extends Component {
             email: '',
             password: '',
             showPassword: false,
-            // muiClasses: null,
             formSent: false,
             sliderTooltipVisible: false,
             electedExpenseInputMode: false,
@@ -487,7 +505,12 @@ class Home extends Component {
             const token = result.credential.accessToken;
             console.log('Home --> handleOauthLogin --> firebase.auth.AuthCredential:', credential);
             this.setState(
-              { buttonPressed: false, oauthLoginClicked: false, user: auth().currentUser },
+              {
+                authenticated: true,
+                buttonPressed: false,
+                oauthLoginClicked: false,
+                user: auth().currentUser
+              },
               () => {
                 toast.success('👍 Google sign-in successful.');
               }
@@ -556,12 +579,19 @@ class Home extends Component {
     }
   };
 
-  getUserName = () =>
-    this.state.user.displayName
-      ? this.state.user.displayName.split(' ')[0].charAt(0).toUpperCase() +
-        this.state.user.displayName.split(' ')[0].slice(1).toLowerCase()
-      : this.state.user.email.split('@')[0].charAt(0).toUpperCase() +
-        this.state.user.email.split('@')[0].slice(1).toLowerCase();
+  getUserName = () => {
+    let userName = '';
+    try {
+      userName = this.state.user.displayName
+        ? this.state.user.displayName.split(' ')[0].charAt(0).toUpperCase() +
+          this.state.user.displayName.split(' ')[0].slice(1).toLowerCase()
+        : this.state.user.email.split('@')[0].charAt(0).toUpperCase() +
+          this.state.user.email.split('@')[0].slice(1).toLowerCase();
+    } catch (error) {
+      console.warn("Could not load user's name.", error);
+    }
+    return userName;
+  };
 
   usdFormat = (value = 0) => {
     const dollarsAndCents = parseFloat(value).toFixed(2).split('.'); // [0]: dollars, [1]: cents
@@ -642,12 +672,12 @@ class Home extends Component {
       <Fragment>
         {/* TODO: add left section when logged in for choosing currency */}
         <TopNavBar
-          authenticated={authenticated}
+          authenticated={this.state.authenticated}
           signup={() => this.setState({ signupClicked: true, resetPasswordClicked: false })}
           login={() => this.setState({ signupClicked: false, resetPasswordClicked: false })}
           handleLogout={this.handleLogout}
         />
-        {authenticated ? (
+        {this.state.authenticated ? (
           <Fragment>
             {budgetFormSubmitted ? (
               <div
@@ -842,10 +872,6 @@ class Home extends Component {
                     {/* Elected Expense */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -983,10 +1009,6 @@ class Home extends Component {
                     {/* Annual Salary */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -1080,10 +1102,6 @@ class Home extends Component {
                     {/* Monthly Expenses */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -1107,10 +1125,6 @@ class Home extends Component {
                     {/* Monthly Savings */}
                     <div
                       style={{
-                        // display: 'grid',
-                        // placeItems: 'center',
-                        // minWidth: 640,
-                        // maxWidth: 960,
                         paddingLeft: 48,
                         paddingRight: 48,
                         marginBottom: 64
@@ -1165,6 +1179,7 @@ class Home extends Component {
           </Fragment>
         ) : (
           <>
+            {/* Signup Form */}
             {signupClicked && (
               <Container>
                 <div
@@ -1296,6 +1311,7 @@ class Home extends Component {
                 </div>
               </Container>
             )}
+            {/* Reset Password Form */}
             {resetPasswordClicked && (
               <Container>
                 <div
@@ -1395,6 +1411,7 @@ class Home extends Component {
                 </div>
               </Container>
             )}
+            {/* Email Login Form */}
             {!signupClicked && !resetPasswordClicked && (
               <Container>
                 <div
@@ -1416,7 +1433,7 @@ class Home extends Component {
                 </div>
 
                 <Form
-                  onSubmit={this.handleLogin}
+                  onSubmit={this.handleEmailLogin}
                   subscription={{ submitting: true }}
                   validate={this.validateForm}
                   onChange={this.handleFormChange}
@@ -1549,12 +1566,12 @@ class Home extends Component {
   }
 }
 
-// const mapStateToProps = (state) => ({});
+const mapStateToProps = ({ root, auth, data, ...rest }) => ({
+  root,
+  auth,
+  data
+});
 
-// const mapDispatchToProps = {};
+const mapDispatchToProps = { handleEmailLogin };
 
-// export default connect(mapStateToProps, mapDispatchToProps)(Home);
-
-// export default Home;
-
-export default withRoot(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(withRoot(Home));

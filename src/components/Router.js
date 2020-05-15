@@ -32,10 +32,10 @@ function Router({ authenticated }) {
   return (
     <BrowserRouter>
       <Switch>
-        <Route exact path='/' render={() => <Home authenticated={authenticated} />}></Route>
+        <Route exact path='/:filter?' render={() => <Home authenticated={authenticated} />}></Route>
       </Switch>
     </BrowserRouter>
   );
 }
 
-export { Router };
+export default Router;
