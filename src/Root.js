@@ -21,8 +21,7 @@ class Root extends Component {
   }
 
   componentDidMount() {
-    console.log('src/Root.js --> componentDidMount');
-    console.log('src/Root.js --> componentDidMount: Redux store', store);
+    console.log('src/Root.js --> componentDidMount: Redux store', store.getState());
     auth().onAuthStateChanged(user => {
       if (user) {
         this.setState({

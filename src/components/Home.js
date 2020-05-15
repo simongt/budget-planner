@@ -42,6 +42,7 @@ import { email, required } from './form/validation';
 import { connect } from 'react-redux';
 import { auth } from '../services/firebase';
 import { sleep } from '../util';
+import { handleEmailLogin } from '../redux/actions';
 // notifications styling config
 import 'react-toastify/dist/ReactToastify.css';
 // pie chart styling config
@@ -269,7 +270,17 @@ class Home extends Component {
     );
   };
 
+  // getSnapshotBeforeUpdate = (prevProps, prevState) => {};
+
   componentDidUpdate(prevProps, prevState) {
+    if (prevProps.root.authenticated !== this.props.root.authenticated) {
+      console.log('Home --> componentDidUpdate: User is successfully authenticated.');
+      this.setState({ authenticated: this.props.root.authenticated });
+    }
+    if (prevProps.auth.user !== this.props.auth.user) {
+      console.log("Home --> componentDidUpdate: User's account is successfully loaded.");
+      this.setState({ user: this.props.auth.user });
+    }
     if (
       prevState.election !== this.state.election ||
       prevState.annualSalary !== this.state.annualSalary
@@ -368,38 +379,44 @@ class Home extends Component {
     );
   };
 
-  handleLogin = values => {
-    console.log('Home --> handleLogin', values);
+  // wrapper method around redux action of same name
+  handleEmailLogin = values => {
+    console.log('Home --> handleEmailLogin', values);
     event.preventDefault();
-    this.setState(
-      {
-        error: '',
-        email: values.email,
-        password: values.password,
-        formSent: true
-      },
-      () => {
-        auth()
-          .signInWithEmailAndPassword(this.state.email, this.state.password)
-          .then(
-            result => {
-              console.log(result);
-              toast.success('👍 Email sign-in successful.');
-              this.setState({
-                authenticated: true,
-                user: auth().currentUser,
-                formSent: false
-              });
-            },
-            error => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              toast.error('🧐' + error.message);
-              this.setState({ error: error.message, formSent: false });
-            }
-          );
-      }
-    );
+    const reenableForm = () => this.setState({ formSent: false });
+    this.setState({ formSent: true }, () => {
+      this.props.handleEmailLogin(values.email, values.password, reenableForm);
+    });
+    // TODO: dispatch form sent and wire it up to this component
+    // this.setState(
+    //   {
+    //     error: '',
+    //     email: values.email,
+    //     password: values.password,
+    //     formSent: true
+    //   },
+    //   () => {
+    //     auth()
+    //       .signInWithEmailAndPassword(this.state.email, this.state.password)
+    //       .then(
+    //         result => {
+    //           console.log(result);
+    //           toast.success('👍 Email sign-in successful.');
+    //           this.setState({
+    //             authenticated: true,
+    //             user: auth().currentUser,
+    //             formSent: false
+    //           });
+    //         },
+    //         error => {
+    //           const errorCode = error.code;
+    //           const errorMessage = error.message;
+    //           toast.error('🧐' + error.message);
+    //           this.setState({ error: error.message, formSent: false });
+    //         }
+    //       );
+    //   }
+    // );
   };
 
   handleResetPassword = values => {
@@ -562,12 +579,19 @@ class Home extends Component {
     }
   };
 
-  getUserName = () =>
-    this.state.user.displayName
-      ? this.state.user.displayName.split(' ')[0].charAt(0).toUpperCase() +
-        this.state.user.displayName.split(' ')[0].slice(1).toLowerCase()
-      : this.state.user.email.split('@')[0].charAt(0).toUpperCase() +
-        this.state.user.email.split('@')[0].slice(1).toLowerCase();
+  getUserName = () => {
+    let userName = '';
+    try {
+      userName = this.state.user.displayName
+        ? this.state.user.displayName.split(' ')[0].charAt(0).toUpperCase() +
+          this.state.user.displayName.split(' ')[0].slice(1).toLowerCase()
+        : this.state.user.email.split('@')[0].charAt(0).toUpperCase() +
+          this.state.user.email.split('@')[0].slice(1).toLowerCase();
+    } catch (error) {
+      console.warn("Could not load user's name.", error);
+    }
+    return userName;
+  };
 
   usdFormat = (value = 0) => {
     const dollarsAndCents = parseFloat(value).toFixed(2).split('.'); // [0]: dollars, [1]: cents
@@ -648,12 +672,12 @@ class Home extends Component {
       <Fragment>
         {/* TODO: add left section when logged in for choosing currency */}
         <TopNavBar
-          authenticated={authenticated}
+          authenticated={this.state.authenticated}
           signup={() => this.setState({ signupClicked: true, resetPasswordClicked: false })}
           login={() => this.setState({ signupClicked: false, resetPasswordClicked: false })}
           handleLogout={this.handleLogout}
         />
-        {authenticated ? (
+        {this.state.authenticated ? (
           <Fragment>
             {budgetFormSubmitted ? (
               <div
@@ -1155,6 +1179,7 @@ class Home extends Component {
           </Fragment>
         ) : (
           <>
+            {/* Signup Form */}
             {signupClicked && (
               <Container>
                 <div
@@ -1286,6 +1311,7 @@ class Home extends Component {
                 </div>
               </Container>
             )}
+            {/* Reset Password Form */}
             {resetPasswordClicked && (
               <Container>
                 <div
@@ -1385,6 +1411,7 @@ class Home extends Component {
                 </div>
               </Container>
             )}
+            {/* Email Login Form */}
             {!signupClicked && !resetPasswordClicked && (
               <Container>
                 <div
@@ -1406,7 +1433,7 @@ class Home extends Component {
                 </div>
 
                 <Form
-                  onSubmit={this.handleLogin}
+                  onSubmit={this.handleEmailLogin}
                   subscription={{ submitting: true }}
                   validate={this.validateForm}
                   onChange={this.handleFormChange}
@@ -1539,8 +1566,12 @@ class Home extends Component {
   }
 }
 
-const mapStateToProps = state => ({});
+const mapStateToProps = ({ root, auth, data, ...rest }) => ({
+  root,
+  auth,
+  data
+});
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = { handleEmailLogin };
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRoot(Home));

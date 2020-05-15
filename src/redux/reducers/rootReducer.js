@@ -1,17 +1,33 @@
 // TODO: add types
-import { LOADING_UI, LOADING_USER, SET_ERRORS, UNSET_ERRORS } from '../types';
+import {
+  UI_IS_LOADING,
+  UI_IS_LOADED,
+  SET_MUI_CLASSES,
+  USER_IS_LOGGED_IN,
+  USER_IS_NOT_LOGGED_IN
+  //
+} from '../types';
 
 // TODO: add initial state
 const initialState = {
-  uiLoading: false,
-  userLoading: false,
-  errors: ''
+  loading: false,
+  muiClasses: {}, // material ui theme
+  authenticated: false
 };
 
 export default (state = initialState, action) => {
+  console.log('rootReducer --> action: ', action);
   switch (action.type) {
-    // case SET_SOME_TYPE:
-    //   return { ...state, profile: action.payload };
+    case UI_IS_LOADING:
+      return { ...state, loading: true };
+    case UI_IS_LOADED:
+      return { ...state, loading: false };
+    case USER_IS_LOGGED_IN:
+      return { ...state, authenticated: true };
+    case USER_IS_NOT_LOGGED_IN:
+      return { ...state, authenticated: false };
+    case SET_MUI_CLASSES:
+      return { ...state, muiClasses: action.payload };
     default:
       return state;
   }

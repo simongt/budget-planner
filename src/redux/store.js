@@ -11,11 +11,11 @@ import { createFirestoreInstance, firestoreReducer } from 'redux-firestore'; // 
 // import 'firebase/database';
 // import 'firebase/firestore';
 // import { firebaseConfig, firebase, auth, db, firestore } from '../services/firebase';
-import { rootReducer, authReducer, userReducer } from './reducers';
+import { rootReducer, authReducer, dataReducer } from './reducers';
 
 const initialState = {};
 
-const middleware = [thunk, logger];
+const middleware = [thunk, logger]; // ?
 
 const persistConfig = {
   // Root
@@ -32,7 +32,7 @@ const persistConfig = {
 const reducers = combineReducers({
   root: rootReducer,
   auth: authReducer,
-  user: userReducer
+  data: dataReducer
 });
 console.log('Redux store --> reducers', reducers);
 
@@ -44,7 +44,7 @@ console.log('Redux store --> persistedReducer', persistedReducer);
 const store = createStore(
   persistedReducer,
   initialState,
-  composeWithDevTools(applyMiddleware(...middleware))
+  composeWithDevTools(applyMiddleware(...middleware)) // ?
 );
 console.log('Redux store --> store', store);
 
