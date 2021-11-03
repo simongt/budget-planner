@@ -66,6 +66,6 @@
     "redux-firestore": "^0.13.0",
     "typeface-roboto": "0.0.75",
     "unused-webpack-plugin": "^2.4.0",
-    "validator": "^13.0.0"
+    "validator": "^13.7.0"
   }
 }
