@@ -1,11 +1,10 @@
 import withRoot from './lib/withRoot';
 import React, { Component } from 'react';
-import { Login, Signup, Home, Landing, Report, Slider } from './views';
-import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
+import { Login, Signup, Home, Landing, Report, Slider } from './components';
 import { hot } from 'react-hot-loader/root';
 // import { connect } from 'react-redux';
 import { auth } from './services/firebase';
-import { PrivateRoute, PublicRoute, Routes } from './views/Routes';
+import { Router } from './components/Router';
 import { CircularProgress, LinearProgress } from '@material-ui/core';
 
 class App extends Component {
@@ -41,7 +40,7 @@ class App extends Component {
     return this.state.loading ? (
       <LinearProgress color='secondary' />
     ) : (
-      <Routes authenticated={this.state.authenticated} />
+      <Router authenticated={this.state.authenticated} />
     );
   }
 }
