@@ -51,7 +51,7 @@
     "devextreme-react": "^19.2.7",
     "final-form": "^4.19.1",
     "firebase": "^7.14.1",
-    "markdown-to-jsx": "^6.11.1",
+    "markdown-to-jsx": "^6.11.4",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-cool-img": "^1.1.2",
